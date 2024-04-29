@@ -5,6 +5,8 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using EDBR.DB;
+using Unity.VisualScripting;
 
 public class UIManager : MonoBehaviour
 {
@@ -18,6 +20,7 @@ public class UIManager : MonoBehaviour
     {
         InitHeaderComponents();
         InitSearchComponents();
+
     }
 
     private void InitHeaderComponents()
@@ -34,7 +37,9 @@ public class UIManager : MonoBehaviour
 
     private void PerformLocalFactionSearch(string value)
     {
-        Debug.Log(value);
+        string[] matches = Factions.FindPartialMatches(value);
+        foreach(string s in matches) Debug.Log(s);
+        UpdateSearchResults(matches);
     }
 
     private void UpdateUI(UIState state)
@@ -44,6 +49,28 @@ public class UIManager : MonoBehaviour
         UIState[] searchStates = { UIState.search };
 
         search.canvas.enabled = (searchStates.Any(x => x == uiState));
+    }
+
+    private void UpdateSearchResults(string[] results)
+    {
+        //Clear current search results
+        foreach (Transform child in search.search_results.transform)
+        {
+            Destroy(child.gameObject);
+        }
+
+        foreach(string r in results)
+        {
+            GameObject newSearchResult = Instantiate(search.search_result_prefab);
+            newSearchResult.GetComponentInChildren<TMP_Text>().text = r;
+            newSearchResult.GetComponent<Button>().onClick.AddListener(() => GetFactionDetails(r));
+            newSearchResult.transform.SetParent(search.search_results.transform);
+        }
+    }
+
+    private void GetFactionDetails(string r)
+    {
+        Debug.Log($"REACHED GetFactionDetails({r})");
     }
 
     [System.Serializable]
