@@ -3,24 +3,25 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json;
+using Random = UnityEngine.Random;
 
 namespace EDBR.Data
 {
     public static class Conversions
     {
-        public static System SystemFromJson(string json)
+        public static _system SystemFromJson(string json)
         {
-            return JsonConvert.DeserializeObject<System>(json);
+            return JsonConvert.DeserializeObject<_system>(json);
         }
 
-        public static Faction FactionFromJson(string json)
+        public static _faction FactionFromJson(string json)
         {
-            return JsonConvert.DeserializeObject<Faction>(json);
+            return JsonConvert.DeserializeObject<_faction>(json);
         }
     }
 
     [global::System.Serializable]
-    public struct System
+    public struct _system
     {
         [JsonProperty("_id")]
         public string id { get; set; }
@@ -150,7 +151,7 @@ namespace EDBR.Data
     }
 
     [global::System.Serializable]
-    public struct Faction
+    public struct _faction
     {
         [JsonProperty("_id")]
         public string _id { get; set; }
@@ -214,6 +215,20 @@ namespace EDBR.Data
 
             [JsonProperty("updated_at")]
             public DateTime updated_at { get; set; }
+        }
+    }
+
+    public struct TrackedFaction
+    {
+        public string _id;
+        public Color color;
+        public _faction faction;
+
+        public TrackedFaction(_faction faction)
+        {
+            _id = faction._id;
+            color = new Color(Random.value, Random.value, Random.value, 1.0f);
+            this.faction = faction;
         }
     }
 }

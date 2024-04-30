@@ -42,4 +42,9 @@ namespace EDBR.DB
             return results.ToArray();
         }
     }
+
+    public static class Systems
+    {
+        const string path = "URI=file:Assets/Resources/Databases/systems.db";
+    }
 }
