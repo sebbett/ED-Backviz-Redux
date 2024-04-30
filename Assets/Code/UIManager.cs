@@ -6,10 +6,16 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using EDBR.DB;
-using Unity.VisualScripting;
+using EDBR.Data;
+using EDBR;
 
 public class UIManager : MonoBehaviour
 {
+    private void Awake()
+    {
+        GameManager.Events.factionDataReceived += factionDataReceived;
+        GameManager.Events.factionDataError += factionDataError;
+    }
 
     public Header header;
     public Search search;  
@@ -58,19 +64,49 @@ public class UIManager : MonoBehaviour
         {
             Destroy(child.gameObject);
         }
-
-        foreach(string r in results)
+        //Add new results
+        foreach (string r in results)
         {
             GameObject newSearchResult = Instantiate(search.search_result_prefab);
             newSearchResult.GetComponentInChildren<TMP_Text>().text = r;
             newSearchResult.GetComponent<Button>().onClick.AddListener(() => GetFactionDetails(r));
             newSearchResult.transform.SetParent(search.search_results.transform);
         }
+
+        search.no_matches_found.enabled = !(results.Length > 0);
     }
 
     private void GetFactionDetails(string r)
     {
-        Debug.Log($"REACHED GetFactionDetails({r})");
+        search.faction_details.SetActive(false);
+        search.spinner.enabled = true;
+        StartCoroutine(API.GetFactionData(r));
+    }
+
+    private void factionDataReceived(string data)
+    {
+        Faction faction = Conversions.FactionFromJson(data);
+        search.faction_details.SetActive(true);
+        search.spinner.enabled = false;
+
+        search.details_name.text = faction.name;
+        search.details_home.text = ($"Home: {faction.faction_presence[0].system_name}");
+        search.details_allegiance.text = ($"Allegiance: {faction.allegiance}");
+        search.details_government.text = ($"Government: {faction.government}");
+        search.details_presence.text = ($"Presence: {faction.faction_presence.Count()} systems(s)");
+
+        search.track.onClick.RemoveAllListeners();
+        search.track.onClick.AddListener(() => addTrackedFaction(faction.name));
+    }
+
+    private void addTrackedFaction(string name)
+    {
+        Debug.Log($"addTrackedFaction({name})");
+    }
+
+    private void factionDataError(string error)
+    {
+        throw new NotImplementedException();
     }
 
     [System.Serializable]
@@ -91,9 +127,23 @@ public class UIManager : MonoBehaviour
     public class Search
     {
         public Canvas canvas;
-        public Button close, track;
+        public Button close;
         public TMP_InputField search_bar;
-        public GameObject faction_details, search_results;
-        public GameObject search_result_prefab;
+        public TMP_Text no_matches_found;
+        public Image spinner;
+        public GameObject
+            faction_details,
+            search_results,
+            search_result_prefab;
+
+        //faction detail objects
+        public TMP_Text
+            details_name,
+            details_home,
+            details_allegiance,
+            details_government,
+            details_presence;
+
+        public Button track;
     }
 }

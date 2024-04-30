@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 using System.Web;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace EDBR
 {
@@ -34,7 +36,11 @@ namespace EDBR
                 {
                     if (GameManager.Events.factionDataReceived != null)
                     {
-                        GameManager.Events.factionDataReceived(request.downloadHandler.text);
+                        var jsonObject = JObject.Parse(request.downloadHandler.text);
+                        JArray docsArray = (JArray)jsonObject["docs"];
+                        string value = docsArray[0].ToString();
+
+                        GameManager.Events.factionDataReceived(value);
                     }
                 }
             }
