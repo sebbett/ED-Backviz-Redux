@@ -1,7 +1,6 @@
 using EDBR;
 using EDBR.Data;
 using EDBR.DB;
-using System;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -12,9 +11,8 @@ public class UIManager : MonoBehaviour
     private void Awake()
     {
         //Event subscriptions
-        GameManager.Events.trackedFactionsUpdated += trackedFactionsUpdated;
-        GameManager.Events.factionDataReceived += factionDataReceived;
-        GameManager.Events.requestError += factionDataError;
+        GameManager.Events.factionDataReceived.AddListener(factionDataReceived);
+        GameManager.Events.requestError.AddListener((error) => Debug.LogError(error));
     }
 
     #region Variables
@@ -47,23 +45,19 @@ public class UIManager : MonoBehaviour
     private UIState uiState;
     private void UpdateUI(UIState state)
     {
-        Debug.Log($"UPDATING STATE: {state.ToString()}");
         uiState = state;
         UIState[] searchStates = { UIState.search };
+        UIState[] cameraMovementDisableStates = { UIState.search };
 
         search.canvas.enabled = (searchStates.Any(x => x == uiState));
+        mainCamera.GetComponent<MouseOrbit>().allowPan = (cameraMovementDisableStates.Any(x => x == uiState));
     }
 
-    private void factionDataError(string error)
-    {
-        Debug.LogError(error);
-    }
     private void factionDataReceived(_faction[] data)
     {
         switch (uiState)
         {
             case UIState.search:
-                mainCamera.GetComponent<MouseOrbit>().disableMovement();
                 _faction faction = data[0];
                 search.faction_details.SetActive(true);
                 search.spinner.SetActive(false);
@@ -88,7 +82,6 @@ public class UIManager : MonoBehaviour
                 break;
 
             case UIState.main:
-                mainCamera.GetComponent<MouseOrbit>().enableMovement();
                 break;
         }
     }
@@ -97,7 +90,6 @@ public class UIManager : MonoBehaviour
     private void PerformLocalFactionSearch(string value)
     {
         string[] matches = Factions.FindPartialMatches(value);
-        foreach (string s in matches) Debug.Log(s);
         UpdateSearchResults(matches);
     }
 
@@ -128,12 +120,6 @@ public class UIManager : MonoBehaviour
     }
     #endregion
 
-    #region WIP
-    private void trackedFactionsUpdated()
-    {
-        Debug.Log("trackedFactionsUpdated");
-    }
-    #endregion
 
     [System.Serializable]
     public enum UIState

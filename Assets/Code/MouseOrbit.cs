@@ -36,9 +36,7 @@ public class MouseOrbit : MonoBehaviour
 
     private void Awake()
     {
-        /*Game.Events.disableMovement += disableMovment;
-        Game.Events.enableMovement += enableMovement;
-        Game.Events.sysButtonClicked += sysButtonClicked;*/
+        GameManager.Events.systemSelected.AddListener((v) => SetTarget(new Vector3(v.x, v.y, v.z)));
     }
 
     public void disableMovement()
@@ -71,7 +69,6 @@ public class MouseOrbit : MonoBehaviour
         {
             firstMousePosition = Input.mousePosition;
         }
-
         if (Input.GetKey(KeyCode.Mouse0))
         {
             if (!spinUnlocked)
@@ -82,13 +79,10 @@ public class MouseOrbit : MonoBehaviour
                 }
             }
         }
-
         if (Input.GetKeyUp(KeyCode.Mouse0))
         {
             spinUnlocked = false;
         }
-
-
         if (spinUnlocked)
         {
             x += Input.GetAxis("Mouse X") * xSpeed * 0.02f;

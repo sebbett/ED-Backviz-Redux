@@ -38,7 +38,6 @@ namespace EDBR.DB
 
             conn.Close();
             stopwatch.Stop();
-            Debug.Log($"FINISHED FindPartialMatches({input}) IN {stopwatch.ElapsedMilliseconds} milliseconds");
             return results.ToArray();
         }
     }
