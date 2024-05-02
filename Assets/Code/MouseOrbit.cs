@@ -12,6 +12,7 @@ public class MouseOrbit : MonoBehaviour
     public float followSmoothing = 0.01f;
     public bool overrideAllowPan = true;
     public bool allowPan = true;
+    public bool lockControls = false;
     public bool drawDebug = true;
     public float panSpeed;
     public Transform selectionIndicator;
@@ -65,37 +66,44 @@ public class MouseOrbit : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Mouse0))
+        Vector3 forward = new Vector3();
+        Vector3 right = new Vector3();
+        Vector3 up = new Vector3();
+        if (!lockControls)
         {
-            firstMousePosition = Input.mousePosition;
-        }
-        if (Input.GetKey(KeyCode.Mouse0))
-        {
-            if (!spinUnlocked)
+            forward = new Vector3(transform.forward.x, 0, transform.forward.z) * Input.GetAxis("forward/back") * panSpeed * Time.deltaTime;
+            right = new Vector3(transform.right.x, 0, transform.right.z) * Input.GetAxis("left/right") * panSpeed * Time.deltaTime;
+            up = Vector3.up * Input.GetAxis("up/down") * panSpeed * Time.deltaTime;
+            viewScale += -Input.GetAxis("Mouse ScrollWheel") * scrollSpeed * viewScale;
+            viewScale = Mathf.Clamp(viewScale, 0.001f, 1);
+
+            if (Input.GetKeyDown(KeyCode.Mouse0))
             {
-                if (Vector2.Distance(Input.mousePosition, firstMousePosition) >= unlockThreshold)
+                firstMousePosition = Input.mousePosition;
+            }
+            if (Input.GetKey(KeyCode.Mouse0))
+            {
+                if (!spinUnlocked)
                 {
-                    spinUnlocked = true;
+                    if (Vector2.Distance(Input.mousePosition, firstMousePosition) >= unlockThreshold)
+                    {
+                        spinUnlocked = true;
+                    }
                 }
             }
+            if (Input.GetKeyUp(KeyCode.Mouse0))
+            {
+                spinUnlocked = false;
+            }
+            if (spinUnlocked)
+            {
+                x += Input.GetAxis("Mouse X") * xSpeed * 0.02f;
+                y -= Input.GetAxis("Mouse Y") * ySpeed * 0.02f;
+            }
         }
-        if (Input.GetKeyUp(KeyCode.Mouse0))
-        {
-            spinUnlocked = false;
-        }
-        if (spinUnlocked)
-        {
-            x += Input.GetAxis("Mouse X") * xSpeed * 0.02f;
-            y -= Input.GetAxis("Mouse Y") * ySpeed * 0.02f;
-        }
-
         y = ClampAngle(y, yMinLimit, yMaxLimit);
 
         Quaternion rotation = Quaternion.Euler(y, x, 0);
-
-        viewScale += -Input.GetAxis("Mouse ScrollWheel") * scrollSpeed * viewScale;
-        viewScale = Mathf.Clamp(viewScale, 0.001f, 1);
-
         distance = Mathf.Lerp(distanceMin, distanceMax, viewScale);
 
         Vector3 negDistance = new Vector3(0.0f, 0.0f, -distance);
@@ -105,29 +113,13 @@ public class MouseOrbit : MonoBehaviour
         transform.position = position;
 
         transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles);
+        wantedTarget += forward + right + up;
 
-        //Paning via WASD
-        if (overrideAllowPan)
+        if (drawDebug)
         {
-            if (allowPan)
-            {
-                Vector3 forward = new Vector3(transform.forward.x, 0, transform.forward.z) * Input.GetAxis("forward/back") * panSpeed * Time.deltaTime;
-                Vector3 right = new Vector3(transform.right.x, 0, transform.right.z) * Input.GetAxis("left/right") * panSpeed * Time.deltaTime;
-                Vector3 up = Vector3.up * Input.GetAxis("up/down") * panSpeed * Time.deltaTime;
-
-                wantedTarget += forward + right + up;
-
-                if (drawDebug)
-                {
-                    Debug.DrawRay(target, forward * 5, Color.magenta);
-                    Debug.DrawRay(target, right * 5, Color.yellow);
-                    Debug.DrawRay(target, up * 5, Color.cyan);
-                }
-            }
-            else
-            {
-                allowPan = Vector3.Distance(target, wantedTarget) < 0.01f;
-            }
+            Debug.DrawRay(target, forward * 5, Color.magenta);
+            Debug.DrawRay(target, right * 5, Color.yellow);
+            Debug.DrawRay(target, up * 5, Color.cyan);
         }
 
         //Smooth follow target

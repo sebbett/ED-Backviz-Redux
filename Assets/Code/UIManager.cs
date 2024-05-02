@@ -1,6 +1,5 @@
 using EDBR;
 using EDBR.Data;
-using EDBR.DB;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -13,7 +12,10 @@ public class UIManager : MonoBehaviour
         //Event subscriptions
         GameManager.Events.factionDataReceived.AddListener(factionDataReceived);
         GameManager.Events.requestError.AddListener((error) => Debug.LogError(error));
+        GameManager.Events.factionsUpdated.AddListener(factionsUpdated);
     }
+
+    
 
     #region Variables
     public Header header;
@@ -33,7 +35,6 @@ public class UIManager : MonoBehaviour
     private void InitHeaderComponents()
     {
         header.search.onClick.AddListener(() => UpdateUI(UIState.search));
-        //header.tracked_factions.onClick.AddListener(() => UpdateUI(UIState.tracked_factions));
     }
     private void InitSearchComponents()
     {
@@ -47,12 +48,13 @@ public class UIManager : MonoBehaviour
     {
         uiState = state;
         UIState[] searchStates = { UIState.search };
-        UIState[] cameraMovementDisableStates = { UIState.search };
+        UIState[] cameraUnlockedStates = { UIState.main };
 
         search.canvas.enabled = (searchStates.Any(x => x == uiState));
-        mainCamera.GetComponent<MouseOrbit>().allowPan = (cameraMovementDisableStates.Any(x => x == uiState));
+        mainCamera.GetComponent<MouseOrbit>().lockControls = !(cameraUnlockedStates.Any(x => x == uiState));
     }
 
+    //Populate search window faction details
     private void factionDataReceived(_faction[] data)
     {
         switch (uiState)
@@ -85,11 +87,34 @@ public class UIManager : MonoBehaviour
                 break;
         }
     }
-    
+
+    //Populate tracked factions
+    private void factionsUpdated()
+    {
+        //Clear current list
+        foreach (Transform child in search.listParent)
+        {
+            Destroy(child.gameObject);
+        }
+
+        //Populate new data
+        foreach (TrackedFaction tf in GameManager.Session.trackedFactions)
+        {
+            GameObject newObject = Instantiate(search.trackedFactionPrefab);
+            newObject.transform.Find("$FACTION_NAME").GetComponent<TMP_Text>().text = tf.faction.name;
+            newObject.transform.Find("$FACTION_HOME").GetComponent<TMP_Text>().text = tf.faction.faction_presence[0].system_name;
+            newObject.transform.Find("$FACTION_PRESENCE").GetComponent<TMP_Text>().text = ($"{tf.faction.faction_presence.Count} SYSTEMS");
+            newObject.transform.Find("$FACTION_COLOR").GetComponent<Image>().color = tf.color;
+            newObject.transform.SetParent(search.listParent);
+            newObject.GetComponent<Button>().onClick.AddListener(() => GameManager.Session.setSelectedFaction(tf.faction.name));
+        }
+    }
+
     #region Faction search functionality
+    //
     private void PerformLocalFactionSearch(string value)
     {
-        string[] matches = Factions.FindPartialMatches(value);
+        string[] matches = DB.Factions.FindPartialMatches(value);
         UpdateSearchResults(matches);
     }
 
@@ -126,7 +151,6 @@ public class UIManager : MonoBehaviour
     {
         main = 0,
         search = 1,
-        tracked_factions = 2
     }
 
     #region data types
@@ -134,7 +158,7 @@ public class UIManager : MonoBehaviour
     public class Header
     {
         public Canvas canvas;
-        public Button search, tracked_factions;
+        public Button search;
     }
     [System.Serializable]
     public class Search
@@ -164,6 +188,9 @@ public class UIManager : MonoBehaviour
             details_presence;
 
         public Button track;
+
+        public GameObject trackedFactionPrefab;
+        public Transform listParent;
     }
     #endregion
 }

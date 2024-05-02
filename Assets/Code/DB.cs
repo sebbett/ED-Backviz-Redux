@@ -4,46 +4,48 @@ using UnityEngine;
 using System;
 using Mono.Data.Sqlite;
 using System.Diagnostics;
-using Debug = UnityEngine.Debug;
 
-namespace EDBR.DB
+namespace EDBR
 {
-    public static class Factions
+    public static class DB
     {
-        const string path = "URI=file:Assets/Resources/Databases/factions.db";
-
-        public static string[] FindPartialMatches(string input)
+        public static class Factions
         {
-            Stopwatch stopwatch = Stopwatch.StartNew();
+            const string path = "URI=file:Assets/Resources/Databases/factions.db";
 
-            SqliteConnection conn = new SqliteConnection(path);
-            conn.Open();
-
-            List<string> results = new List<string>();
-
-            string query = $"SELECT * FROM factions WHERE name LIKE @input LIMIT 12";
-
-            using (var command = new SqliteCommand(query, conn))
+            public static string[] FindPartialMatches(string input)
             {
-                command.Parameters.AddWithValue("@input", "%" + input + "%");
+                Stopwatch stopwatch = Stopwatch.StartNew();
 
-                using (var reader = command.ExecuteReader())
+                SqliteConnection conn = new SqliteConnection(path);
+                conn.Open();
+
+                List<string> results = new List<string>();
+
+                string query = $"SELECT * FROM factions WHERE name LIKE @input LIMIT 12";
+
+                using (var command = new SqliteCommand(query, conn))
                 {
-                    while (reader.Read())
+                    command.Parameters.AddWithValue("@input", "%" + input + "%");
+
+                    using (var reader = command.ExecuteReader())
                     {
-                        results.Add(reader.GetString(reader.GetOrdinal("name")));
+                        while (reader.Read())
+                        {
+                            results.Add(reader.GetString(reader.GetOrdinal("name")));
+                        }
                     }
                 }
+
+                conn.Close();
+                stopwatch.Stop();
+                return results.ToArray();
             }
-
-            conn.Close();
-            stopwatch.Stop();
-            return results.ToArray();
         }
-    }
 
-    public static class Systems
-    {
-        const string path = "URI=file:Assets/Resources/Databases/systems.db";
+        public static class Systems
+        {
+            const string path = "URI=file:Assets/Resources/Databases/systems.db";
+        }
     }
 }
