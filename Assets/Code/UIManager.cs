@@ -1,5 +1,6 @@
 using EDBR;
 using EDBR.Data;
+using System;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -13,14 +14,18 @@ public class UIManager : MonoBehaviour
         GameManager.Events.factionDataReceived.AddListener(factionDataReceived);
         GameManager.Events.requestError.AddListener((error) => Debug.LogError(error));
         GameManager.Events.factionsUpdated.AddListener(factionsUpdated);
+        GameManager.Events.systemSelected.AddListener(systemSelected);
     }
 
     
+
+
 
     #region Variables
     public Header header;
     public Search search;
     public About about;
+    public Details details;
     public Camera mainCamera;
     #endregion
 
@@ -30,7 +35,24 @@ public class UIManager : MonoBehaviour
         InitHeaderComponents();
         InitSearchComponents();
         InitAboutComponents();
+        InitDetailComponents();
         UpdateUI(UIState.main);
+    }
+
+    private void Update()
+    {
+        if (details.isOpen)
+            details.wanted_x = details.open_x;
+        else
+            details.wanted_x = details.closed_x;
+
+        details.current_x = Mathf.Lerp(details.current_x, details.wanted_x, details.speed);
+
+        RectTransform pos = details.panel.GetComponent<RectTransform>();
+
+        Vector2 newPos = new Vector2(details.current_x, pos.anchoredPosition.y);
+
+        details.panel.GetComponent<RectTransform>().anchoredPosition = newPos;
     }
 
     #region Init
@@ -51,6 +73,10 @@ public class UIManager : MonoBehaviour
         about.button_github.onClick.AddListener(() => Application.OpenURL("https://github.com/sebbett/ED-Backviz-Redux"));
         about.button_kofi.onClick.AddListener(() => Application.OpenURL("https://ko-fi.com/sebinspace"));
     }
+    private void InitDetailComponents()
+    {
+        details.conflicts.onClick.AddListener(() => ToggleConflictsPanel());
+    }
     #endregion
 
     private UIState uiState;
@@ -63,6 +89,17 @@ public class UIManager : MonoBehaviour
         about.canvas.enabled = (uiState == UIState.about);
         mainCamera.GetComponent<MouseOrbit>().lockControls = !(cameraUnlockedStates.Any(x => x == uiState));
     }
+
+    private void ToggleConflictsPanel()
+    {
+        details.isOpen = !details.isOpen;
+    }
+
+    /*private void CopySystemNameToClipboard()
+    {
+        if (selectedSystem.name != "" && selectedSystem.name != null)
+            GUIUtility.systemCopyBuffer = selectedSystem.name;
+    }*/
 
     //Populate search window faction details
     private void factionDataReceived(_faction[] data)
@@ -120,6 +157,14 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    //Populate System Details
+    private void systemSelected(_system s)
+    {
+        UpdateUI(UIState.main);
+        details.canvas.enabled = true;
+        details.system_label.text = s.name;
+    }
+
     #region Faction search functionality
     //
     private void PerformLocalFactionSearch(string value)
@@ -154,7 +199,6 @@ public class UIManager : MonoBehaviour
         StartCoroutine(API.GetFactionData(r));
     }
     #endregion
-
 
     [System.Serializable]
     public enum UIState
@@ -213,6 +257,17 @@ public class UIManager : MonoBehaviour
             button_discord,
             button_github,
             button_kofi;
+    }
+
+    [System.Serializable]
+    public class Details
+    {
+        public bool isOpen = false;
+        public float open_x, closed_x, wanted_x, current_x, speed;
+        public Canvas canvas;
+        public GameObject panel;
+        public Button conflicts, copy;
+        public TMP_Text system_label;
     }
     #endregion
 }
