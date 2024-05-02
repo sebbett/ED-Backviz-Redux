@@ -20,6 +20,7 @@ public class UIManager : MonoBehaviour
     #region Variables
     public Header header;
     public Search search;
+    public About about;
     public Camera mainCamera;
     #endregion
 
@@ -28,6 +29,7 @@ public class UIManager : MonoBehaviour
         mainCamera = Camera.main;
         InitHeaderComponents();
         InitSearchComponents();
+        InitAboutComponents();
         UpdateUI(UIState.main);
     }
 
@@ -35,11 +37,19 @@ public class UIManager : MonoBehaviour
     private void InitHeaderComponents()
     {
         header.search.onClick.AddListener(() => UpdateUI(UIState.search));
+        header.about.onClick.AddListener(() => UpdateUI( UIState.about));
     }
     private void InitSearchComponents()
     {
         search.close.onClick.AddListener(() => UpdateUI(UIState.main));
         search.search_bar.onValueChanged.AddListener((value) => PerformLocalFactionSearch(value));
+    }
+    private void InitAboutComponents()
+    {
+        about.button_close.onClick.AddListener(() => UpdateUI(UIState.main));
+        about.button_discord.onClick.AddListener(() => Application.OpenURL("https://discord.gg/TzmJfrPFK2"));
+        about.button_github.onClick.AddListener(() => Application.OpenURL("https://github.com/sebbett/ED-Backviz-Redux"));
+        about.button_kofi.onClick.AddListener(() => Application.OpenURL("https://ko-fi.com/sebinspace"));
     }
     #endregion
 
@@ -47,10 +57,10 @@ public class UIManager : MonoBehaviour
     private void UpdateUI(UIState state)
     {
         uiState = state;
-        UIState[] searchStates = { UIState.search };
         UIState[] cameraUnlockedStates = { UIState.main };
 
-        search.canvas.enabled = (searchStates.Any(x => x == uiState));
+        search.canvas.enabled = (uiState == UIState.search);
+        about.canvas.enabled = (uiState == UIState.about);
         mainCamera.GetComponent<MouseOrbit>().lockControls = !(cameraUnlockedStates.Any(x => x == uiState));
     }
 
@@ -151,6 +161,7 @@ public class UIManager : MonoBehaviour
     {
         main = 0,
         search = 1,
+        about = 2
     }
 
     #region data types
@@ -158,7 +169,7 @@ public class UIManager : MonoBehaviour
     public class Header
     {
         public Canvas canvas;
-        public Button search;
+        public Button search, about;
     }
     [System.Serializable]
     public class Search
@@ -191,6 +202,17 @@ public class UIManager : MonoBehaviour
 
         public GameObject trackedFactionPrefab;
         public Transform listParent;
+    }
+
+    [System.Serializable]
+    public class About
+    {
+        public Canvas canvas;
+        public Button
+            button_close,
+            button_discord,
+            button_github,
+            button_kofi;
     }
     #endregion
 }
