@@ -163,6 +163,28 @@ public class UIManager : MonoBehaviour
         UpdateUI(UIState.main);
         details.canvas.enabled = true;
         details.system_label.text = s.name;
+
+        //Clear current faction objects
+        foreach(Transform child in details.faction_object_parent)
+        {
+            Destroy(child.gameObject);
+        }
+
+        //Populate the list
+        foreach(_system.Faction f in s.factions)
+        {
+            string name = f.name;
+            string inf = GameManager.Session.getFactionInfluence(s.id, f.faction_id);
+            string state = GameManager.Session.getFactionState(s.id, f.faction_id);
+
+            GameObject newFO = Instantiate(details.faction_object_prefab);
+            newFO.transform.Find("$FACTION_NAME").GetComponent<TMP_Text>().text = name;
+            newFO.transform.Find("$INFLUENCE").GetComponent<TMP_Text>().text = inf;
+            newFO.transform.Find("$STATE_COLOR").transform.Find("$STATE_TEXT").GetComponent<TMP_Text>().text = state;
+            newFO.GetComponent<Button>().onClick.AddListener(() => UpdateUI(UIState.search));
+            newFO.GetComponent<Button>().onClick.AddListener(() => GetFactionDetails(f.name));
+            newFO.transform.SetParent(details.faction_object_parent);
+        }
     }
 
     #region Faction search functionality
@@ -266,6 +288,8 @@ public class UIManager : MonoBehaviour
         public float open_x, closed_x, wanted_x, current_x, speed;
         public Canvas canvas;
         public GameObject panel;
+        public Transform faction_object_parent;
+        public GameObject faction_object_prefab;
         public Button conflicts, copy;
         public TMP_Text system_label;
     }
