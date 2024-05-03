@@ -1,12 +1,10 @@
 using EDBR;
 using EDBR.Data;
-using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Xml;
 using TMPro;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -186,20 +184,25 @@ public class UIManager : MonoBehaviour
             Destroy(child.gameObject);
         }
 
+        //Sort factions by influence
+        _system.Faction[] sortedFactions = s.factions.OrderByDescending(x => x.faction_details.faction_presence.influence).ToArray();
+
+
+
         //Populate the list
-        foreach(_system.Faction f in s.factions)
+        foreach(_system.Faction f in sortedFactions)
         {
             string name = f.name;
-            //string inf = GameManager.Session.getFactionInfluence(s.id, f.faction_id);
             float inf = (float)f.faction_details.faction_presence.influence * 100;
-            //string state = GameManager.Session.getFactionState(s.id, f.faction_id);
-            string state = f.faction_details.faction_presence.state;
+            string current_state = f.faction_details.faction_presence.state;
+            //string pending_state = "none";
+            //Debug.Log(pending_state);
 
             GameObject newFO = Instantiate(details.faction_object_prefab);
             newFO.transform.Find("$FACTION_NAME").GetComponent<TMP_Text>().text = name;
             newFO.transform.Find("$INFLUENCE").GetComponent<TMP_Text>().text = ($"{inf.ToString("##.##")}%");
-            newFO.transform.Find("$STATE_COLOR").transform.Find("$STATE_TEXT").GetComponent<TMP_Text>().text = state;
-            newFO.transform.Find("$STATE_COLOR").GetComponent<Image>().color = GetStateColor(state);
+            newFO.transform.Find("$STATE_COLOR").transform.Find("$STATE_TEXT").GetComponent<TMP_Text>().text = current_state;
+            newFO.transform.Find("$STATE_COLOR").GetComponent<Image>().color = GetStateColor(current_state);
             newFO.GetComponent<Button>().onClick.AddListener(() => UpdateUI(UIState.search));
             newFO.GetComponent<Button>().onClick.AddListener(() => GetFactionDetails(f.name));
             newFO.transform.SetParent(details.faction_object_parent);
@@ -228,9 +231,13 @@ public class UIManager : MonoBehaviour
         //Populate new conflicts
         foreach(_system.Conflict c in s.conflicts)
         {
+            string conflict_status = c.status;
+            if (conflict_status == "")
+                conflict_status = "concluded";
+
             GameObject newCO = Instantiate(details.conflict_object_prefab);
             newCO.transform.Find("$CONFLICT_TYPE").GetComponent<TMP_Text>().text = c.type;
-            newCO.transform.Find("$CONFLICT_STATUS").GetComponent<TMP_Text>().text = c.status;
+            newCO.transform.Find("$CONFLICT_STATUS").GetComponent<TMP_Text>().text = conflict_status;
             newCO.transform.Find("$SCORE_A").GetComponent<TMP_Text>().text = c.faction1.days_won.ToString();
             newCO.transform.Find("$SIDE_A_NAME").GetComponent<TMP_Text>().text = c.faction1.name.ToString();
             newCO.transform.Find("$SIDE_A_STAKE").GetComponent<TMP_Text>().text = c.faction1.stake.ToString();
