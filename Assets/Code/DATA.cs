@@ -227,7 +227,7 @@ namespace EDBR.Data
         public TrackedFaction(_faction faction)
         {
             _id = faction._id;
-            color = new Color(Random.value, Random.value, Random.value, 1.0f);
+            color = new Color(Random.Range(0.1f, 0.9f), Random.Range(0.1f, 0.9f), Random.Range(0.1f, 0.9f), 1.0f);
             this.faction = faction;
         }
     }

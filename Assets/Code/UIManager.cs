@@ -2,7 +2,10 @@ using EDBR;
 using EDBR.Data;
 using System;
 using System.Linq;
+using System.Text.RegularExpressions;
+using System.Xml;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -40,6 +43,18 @@ public class UIManager : MonoBehaviour
     }
 
     private void Update()
+    {
+        GetEscapeKey();
+        UpdateSystemDetails();
+    }
+
+    private void GetEscapeKey()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+            UpdateUI(UIState.main);
+    }
+
+    private void UpdateSystemDetails()
     {
         if (details.isOpen)
             details.wanted_x = details.open_x;
@@ -181,9 +196,91 @@ public class UIManager : MonoBehaviour
             newFO.transform.Find("$FACTION_NAME").GetComponent<TMP_Text>().text = name;
             newFO.transform.Find("$INFLUENCE").GetComponent<TMP_Text>().text = inf;
             newFO.transform.Find("$STATE_COLOR").transform.Find("$STATE_TEXT").GetComponent<TMP_Text>().text = state;
+            newFO.transform.Find("$STATE_COLOR").GetComponent<Image>().color = GetStateColor(state);
             newFO.GetComponent<Button>().onClick.AddListener(() => UpdateUI(UIState.search));
             newFO.GetComponent<Button>().onClick.AddListener(() => GetFactionDetails(f.name));
             newFO.transform.SetParent(details.faction_object_parent);
+        }
+
+        string government = CleanText(s.government);
+        string primary_econ = CleanText(s.primary_economy);
+        string secondary_econ = CleanText(s.secondary_economy);
+        string security = CleanText(s.security);
+        string sys_state = CleanText(s.state);
+
+        details.government_label.text = ($"Government: {government}");
+        details.primary_econ_label.text = ($"Primary Economy: {primary_econ}");
+        details.secondary_econ_label.text = ($"Secondary Economy: {secondary_econ}");
+        details.security_label.text = ($"Security: {security}");
+        details.state_label.text = ($"State: {sys_state}");
+
+        //Clear conflict objects
+        foreach(Transform child in details.conflict_object_parent)
+        {
+            Destroy(child.gameObject);
+        }
+
+        details.no_conflicts_label.gameObject.SetActive(s.conflicts.Count == 0);
+
+        //Populate new conflicts
+        foreach(_system.Conflict c in s.conflicts)
+        {
+            GameObject newCO = Instantiate(details.conflict_object_prefab);
+            newCO.transform.Find("$CONFLICT_TYPE").GetComponent<TMP_Text>().text = c.type;
+            newCO.transform.Find("$CONFLICT_STATUS").GetComponent<TMP_Text>().text = c.status;
+            newCO.transform.Find("$SCORE_A").GetComponent<TMP_Text>().text = c.faction1.days_won.ToString();
+            newCO.transform.Find("$SIDE_A_NAME").GetComponent<TMP_Text>().text = c.faction1.name.ToString();
+            newCO.transform.Find("$SIDE_A_STAKE").GetComponent<TMP_Text>().text = c.faction1.stake.ToString();
+
+            newCO.transform.Find("$SCORE_B").GetComponent<TMP_Text>().text = c.faction2.days_won.ToString();
+            newCO.transform.Find("$SIDE_B_NAME").GetComponent<TMP_Text>().text = c.faction2.name.ToString();
+            newCO.transform.Find("$SIDE_B_STAKE").GetComponent<TMP_Text>().text = c.faction2.stake.ToString();
+
+            newCO.transform.SetParent(details.conflict_object_parent);
+        }
+    }
+
+    public Color GetStateColor(string state)
+    {
+        state = state.ToLower();
+
+        string[] greenStates = new string[] { "incursion", "infested" };
+        string[] yellowStates = new string[] { "blight", "drought", "outbreak", "infrastructurefailure", "naturaldisaster", "revolution", "coldwar", "tradewar", "pirateattack", "terroristattack", "retreat", "unhappy", "bust", "civilunrest" };
+        string[] blueStates = new string[] { "publicholiday", "technologicalleap", "historicevent", "colonisation", "expansion", "happy", "elated", "boom", "investment", "civilliberty" };
+        string[] redStates = new string[] { "war", "civilwar", "elections", "despondent", "famine", "lockdown" };
+        string[] greyStates = new string[] { "discontented", "none" };
+
+        Color value = new Color();
+
+        if (greenStates.Contains(state)) value = details.greenState;
+        else if (yellowStates.Contains(state)) value = details.yellowState;
+        else if (blueStates.Contains(state)) value = details.blueState;
+        else if (redStates.Contains(state)) value = details.redState;
+        else value = details.greyState;
+
+        return value;
+    }
+
+    private string CleanText(string input)
+    {
+        // Define the pattern to match the desired word
+        string pattern = @"[a-zA-Z]+;";
+
+        // Create a Regex object with the pattern
+        Regex regex = new Regex(pattern);
+
+        // Match the input against the pattern
+        Match match = regex.Match(input);
+
+        // If there's a match, return the matched value without the semicolon
+        if (match.Success)
+        {
+            return match.Value.TrimEnd(';');
+        }
+        else
+        {
+            // If no match found, return an empty string or handle the case as needed
+            return "None";
         }
     }
 
@@ -285,13 +382,37 @@ public class UIManager : MonoBehaviour
     public class Details
     {
         public bool isOpen = false;
-        public float open_x, closed_x, wanted_x, current_x, speed;
+        public float
+            open_x,
+            closed_x,
+            wanted_x,
+            current_x,
+            speed;
+        public Color
+            greenState,
+            yellowState,
+            blueState,
+            redState,
+            greyState;
         public Canvas canvas;
         public GameObject panel;
-        public Transform faction_object_parent;
-        public GameObject faction_object_prefab;
-        public Button conflicts, copy;
-        public TMP_Text system_label;
+        public Transform
+            faction_object_parent,
+            conflict_object_parent;
+        public GameObject
+            faction_object_prefab,
+            conflict_object_prefab;
+        public Button
+            conflicts,
+            copy;
+        public TMP_Text
+            system_label,
+            government_label,
+            primary_econ_label,
+            secondary_econ_label,
+            security_label,
+            state_label,
+            no_conflicts_label;
     }
     #endregion
 }

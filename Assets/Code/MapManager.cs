@@ -32,6 +32,9 @@ public class MapManager : MonoBehaviour
             GameObject newNode = Instantiate(node_prefab, pos, Quaternion.identity);
             newNode.GetComponentInChildren<MeshRenderer>().material.color = GameManager.Session.colorOfSystem(s);
             newNode.GetComponent<Node>().system_name = s.name;
+
+            if(s.conflicts.Count > 0) newNode.transform.Find("conflict_particles").gameObject.SetActive(true);
+
             newNode.transform.parent = node_parent;
         }
     }
