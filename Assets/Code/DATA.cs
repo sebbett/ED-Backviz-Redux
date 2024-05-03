@@ -53,7 +53,7 @@ namespace EDBR.Data
         public string controlling_minor_faction_id { get; set; }
 
         [JsonProperty("eddb_id")]
-        public int eddb_id { get; set; }
+        public string eddb_id { get; set; }
 
         [JsonProperty("factions")]
         public List<Faction> factions { get; set; }
@@ -172,7 +172,7 @@ namespace EDBR.Data
         public string name { get; set; }
 
         [JsonProperty("eddb_id")]
-        public int eddb_id { get; set; }
+        public string eddb_id { get; set; }
 
         [JsonProperty("faction_presence")]
         public List<FactionPresence> faction_presence { get; set; }

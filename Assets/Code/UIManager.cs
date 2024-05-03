@@ -110,11 +110,10 @@ public class UIManager : MonoBehaviour
         details.isOpen = !details.isOpen;
     }
 
-    /*private void CopySystemNameToClipboard()
+    private void CopySystemNameToClipboard(string text)
     {
-        if (selectedSystem.name != "" && selectedSystem.name != null)
-            GUIUtility.systemCopyBuffer = selectedSystem.name;
-    }*/
+        GUIUtility.systemCopyBuffer = text;
+    }
 
     //Populate search window faction details
     private void factionDataReceived(_faction[] data)
@@ -178,6 +177,7 @@ public class UIManager : MonoBehaviour
         UpdateUI(UIState.main);
         details.canvas.enabled = true;
         details.system_label.text = s.name;
+        details.copy.onClick.AddListener(() => CopySystemNameToClipboard(s.name));
 
         //Clear current faction objects
         foreach(Transform child in details.faction_object_parent)
