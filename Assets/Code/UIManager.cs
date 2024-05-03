@@ -1,5 +1,6 @@
 using EDBR;
 using EDBR.Data;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -189,12 +190,14 @@ public class UIManager : MonoBehaviour
         foreach(_system.Faction f in s.factions)
         {
             string name = f.name;
-            string inf = GameManager.Session.getFactionInfluence(s.id, f.faction_id);
-            string state = GameManager.Session.getFactionState(s.id, f.faction_id);
+            //string inf = GameManager.Session.getFactionInfluence(s.id, f.faction_id);
+            float inf = (float)f.faction_details.faction_presence.influence * 100;
+            //string state = GameManager.Session.getFactionState(s.id, f.faction_id);
+            string state = f.faction_details.faction_presence.state;
 
             GameObject newFO = Instantiate(details.faction_object_prefab);
             newFO.transform.Find("$FACTION_NAME").GetComponent<TMP_Text>().text = name;
-            newFO.transform.Find("$INFLUENCE").GetComponent<TMP_Text>().text = inf;
+            newFO.transform.Find("$INFLUENCE").GetComponent<TMP_Text>().text = ($"{inf.ToString("##.##")}%");
             newFO.transform.Find("$STATE_COLOR").transform.Find("$STATE_TEXT").GetComponent<TMP_Text>().text = state;
             newFO.transform.Find("$STATE_COLOR").GetComponent<Image>().color = GetStateColor(state);
             newFO.GetComponent<Button>().onClick.AddListener(() => UpdateUI(UIState.search));

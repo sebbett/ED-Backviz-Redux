@@ -356,7 +356,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1251679943}
   m_HandleRect: {fileID: 1251679942}
   m_Direction: 0
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -2287,7 +2287,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 20.000061}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &331790035
@@ -4284,7 +4284,7 @@ Canvas:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 889637277}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_RenderMode: 0
   m_Camera: {fileID: 0}
@@ -4702,7 +4702,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 66316433}
   m_HandleRect: {fileID: 66316432}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 0.13352773
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -4957,7 +4957,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 690.3603}
+  m_AnchoredPosition: {x: 0, y: 978.01044}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1048130060

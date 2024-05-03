@@ -1,8 +1,7 @@
+using Newtonsoft.Json;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Newtonsoft.Json;
 using Random = UnityEngine.Random;
 
 namespace EDBR.Data
@@ -110,6 +109,74 @@ namespace EDBR.Data
 
             [JsonProperty("faction_id")]
             public string faction_id { get; set; }
+
+            [JsonProperty("faction_details")]
+            public FactionDetails faction_details { get; set; }
+        }
+        public class FactionDetails
+        {
+            [JsonProperty("_id")]
+            public string _id { get; set; }
+
+            [JsonProperty("__v")]
+            public int __v { get; set; }
+
+            [JsonProperty("allegiance")]
+            public string allegiance { get; set; }
+
+            [JsonProperty("eddb_id")]
+            public string eddb_id { get; set; }
+
+            [JsonProperty("faction_presence")]
+            public FactionPresence faction_presence { get; set; }
+
+            public class FactionPresence
+            {
+                [JsonProperty("system_name")]
+                public string system_name { get; set; }
+
+                [JsonProperty("system_name_lower")]
+                public string system_name_lower { get; set; }
+
+                [JsonProperty("system_id")]
+                public string system_id { get; set; }
+
+                [JsonProperty("state")]
+                public string state { get; set; }
+
+                [JsonProperty("influence")]
+                public double influence { get; set; }
+
+                [JsonProperty("happiness")]
+                public string happiness { get; set; }
+
+                [JsonProperty("active_states")]
+                public List<object> active_states { get; set; }
+
+                [JsonProperty("pending_states")]
+                public List<object> pending_states { get; set; }
+
+                [JsonProperty("recovering_states")]
+                public List<object> recovering_states { get; set; }
+
+                [JsonProperty("conflicts")]
+                public List<object> conflicts { get; set; }
+
+                [JsonProperty("updated_at")]
+                public DateTime updated_at { get; set; }
+            }
+
+            [JsonProperty("government")]
+            public string government { get; set; }
+
+            [JsonProperty("name")]
+            public string name { get; set; }
+
+            [JsonProperty("name_lower")]
+            public string name_lower { get; set; }
+
+            [JsonProperty("updated_at")]
+            public string updated_at { get; set; }
         }
         public class Conflict
         {

@@ -131,49 +131,6 @@ public static class GameManager
                 }
             }
         }
-
-        public static string getFactionInfluence(string system_id, string faction_id)
-        {
-            string value = "N/A";
-
-            foreach(TrackedFaction tf in _trackedFactions)
-            {
-                if(tf.faction._id == faction_id)
-                {
-                    foreach(_faction.FactionPresence fp in tf.faction.faction_presence)
-                    {
-                        if(fp.system_id == system_id)
-                        {
-                            float inf = (float)fp.influence * 100;
-                            value = ($"{inf.ToString("##.##")}%");
-                        }
-                    }
-                }
-            }
-
-            return value;
-        }
-        
-        public static string getFactionState(string system_id, string faction_id)
-        {
-            string value = "N/A";
-
-            foreach(TrackedFaction tf in _trackedFactions)
-            {
-                if(tf.faction._id == faction_id)
-                {
-                    foreach(_faction.FactionPresence fp in tf.faction.faction_presence)
-                    {
-                        if(fp.system_id == system_id)
-                        {
-                            value = fp.state;
-                        }
-                    }
-                }
-            }
-
-            return value;
-        }
     }
 
     public static class Events

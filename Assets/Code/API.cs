@@ -27,7 +27,7 @@ namespace EDBR
             return result;
         }
         const string faction_url = "https://elitebgs.app/api/ebgs/v5/factions?";
-        const string system_url = "https://elitebgs.app/api/ebgs/v5/systems?";
+        const string system_url = "https://elitebgs.app/api/ebgs/v5/systems?factionDetails=true";
         const string station_url = "https://elitebgs.app/api/ebgs/v5/stations?";
         const string tick_url = "https://elitebgs.app/api/ebgs/v5/ticks?";
 
@@ -120,7 +120,7 @@ namespace EDBR
                 string url = ($"{system_url}");
                 foreach (string s in sa)
                 {
-                    string query = ($"name={HttpUtility.UrlEncode(s)}&");
+                    string query = ($"&name={HttpUtility.UrlEncode(s)}");
                     url += query;
                 }
 
