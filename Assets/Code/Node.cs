@@ -5,10 +5,9 @@ using UnityEngine.Events;
 
 public class Node : MonoBehaviour
 {
-    public string system_name;
-
+    public UnityEvent onClick = new UnityEvent();
     private void OnMouseUpAsButton()
     {
-        GameManager.Session.setSelectedSystem(system_name);
+        onClick.Invoke();
     }
 }
