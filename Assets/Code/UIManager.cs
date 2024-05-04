@@ -17,7 +17,13 @@ public class UIManager : MonoBehaviour
         GameManager.Events.requestError.AddListener((error) => Debug.LogError(error));
         GameManager.Events.factionsUpdated.AddListener(factionsUpdated);
         GameManager.Events.systemSelected.AddListener(systemSelected);
+        GameManager.Events.systemsUpdated.AddListener(systemsUpdated);
+        GameManager.Events.statusUpdated.AddListener((status) => statusUpdated(status));
     }
+
+    
+
+
 
     #region Variables
     public Header header;
@@ -97,6 +103,7 @@ public class UIManager : MonoBehaviour
 
         search.canvas.enabled = (uiState == UIState.search);
         about.canvas.enabled = (uiState == UIState.about);
+        details.canvas.enabled = (uiState == UIState.main && selectedSystemID.Length > 0);
         mainCamera.GetComponent<MouseOrbit>().lockControls = !(cameraUnlockedStates.Any(x => x == uiState));
     }
 
@@ -108,6 +115,11 @@ public class UIManager : MonoBehaviour
     private void CopySystemNameToClipboard(string text)
     {
         GUIUtility.systemCopyBuffer = text;
+    }
+
+    private void statusUpdated(string status)
+    {
+        header.status.text = status;
     }
 
     //Populate search window faction details
@@ -127,7 +139,7 @@ public class UIManager : MonoBehaviour
                 search.details_presence.text = ($"Presence: {faction.faction_presence.Count()} systems(s)");
 
                 search.track.onClick.RemoveAllListeners();
-                search.track.onClick.AddListener(() => GameManager.Session.addTrackedFaction(faction));
+                search.track.onClick.AddListener(() => GameManager.Session.addTrackedFactions(new _faction[] {faction}));
                 search.track.onClick.AddListener(() => search.track.interactable = false);
 
                 search.track.interactable = !GameManager.Session.isTrackingFaction(faction);
@@ -167,10 +179,11 @@ public class UIManager : MonoBehaviour
     }
 
     //Populate System Details
-    private void systemSelected(_system s)
+
+    private string selectedSystemID = "";
+    private void systemSelected(system_details s)
     {
-        UpdateUI(UIState.main);
-        details.canvas.enabled = true;
+        selectedSystemID = s._id;
         details.system_label.text = s.name;
         details.copy.onClick.AddListener(() => CopySystemNameToClipboard(s.name));
 
@@ -181,20 +194,26 @@ public class UIManager : MonoBehaviour
         }
 
         //Sort factions by influence
-        _system.Faction[] sortedFactions = s.factions.OrderByDescending(x => x.faction_details.faction_presence.influence).ToArray();
+        system_details.Faction[] sortedFactions = s.factions.OrderByDescending(x => x.influence).ToArray();
 
         //Populate the list
-        foreach(_system.Faction f in sortedFactions)
+        foreach(system_details.Faction f in sortedFactions)
         {
             string name = f.name;
-            float inf = (float)f.faction_details.faction_presence.influence * 100;
-            string current_state = f.faction_details.faction_presence.state;
+            string inf()
+            {
+                string i = "LOADING";
+                if(f.influence > 0)
+                    i = ((float)f.influence * 100).ToString("##.##") + "%";
+                return i;
+            }
+            string current_state = f.state;
             //string pending_state = "none";
             //Debug.Log(pending_state);
 
             GameObject newFO = Instantiate(details.faction_object_prefab);
             newFO.transform.Find("$FACTION_NAME").GetComponent<TMP_Text>().text = name;
-            newFO.transform.Find("$INFLUENCE").GetComponent<TMP_Text>().text = ($"{inf.ToString("##.##")}%");
+            newFO.transform.Find("$INFLUENCE").GetComponent<TMP_Text>().text = inf();
             newFO.transform.Find("$STATE_COLOR").transform.Find("$STATE_TEXT").GetComponent<TMP_Text>().text = current_state;
             newFO.transform.Find("$STATE_COLOR").GetComponent<Image>().color = GetStateColor(current_state);
             newFO.GetComponent<Button>().onClick.AddListener(() => UpdateUI(UIState.search));
@@ -223,7 +242,7 @@ public class UIManager : MonoBehaviour
         details.no_conflicts_label.gameObject.SetActive(s.conflicts.Count == 0);
 
         //Populate new conflicts
-        foreach(_system.Conflict c in s.conflicts)
+        foreach(system_details.Conflict c in s.conflicts)
         {
             string conflict_status = c.status;
             if (conflict_status == "")
@@ -241,6 +260,14 @@ public class UIManager : MonoBehaviour
             newCO.transform.Find("$SIDE_B_STAKE").GetComponent<TMP_Text>().text = c.faction2.stake.ToString();
 
             newCO.transform.SetParent(details.conflict_object_parent);
+        }
+    }
+
+    private void systemsUpdated()
+    {
+        if(selectedSystemID.Length > 0)
+        {
+            GameManager.Session.setSelectedSystem(selectedSystemID);
         }
     }
 
@@ -337,6 +364,7 @@ public class UIManager : MonoBehaviour
     {
         public Canvas canvas;
         public Button search, about;
+        public TMP_Text status;
     }
     [System.Serializable]
     public class Search

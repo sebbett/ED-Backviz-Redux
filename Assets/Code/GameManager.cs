@@ -9,17 +9,13 @@ public static class GameManager
     
     public static class Session
     {
+        public static CoroutineExecutor executor;
         private static List<TrackedFaction> _trackedFactions = new List<TrackedFaction>();
         public static List<TrackedFaction> trackedFactions { get { return _trackedFactions; } }
 
-        public static void addTrackedFaction(_faction newFaction)
-        {
-            if(!isTrackingFaction(newFaction))
-                _trackedFactions.Add(new TrackedFaction(newFaction));
+        private static List<system_details> _trackedSystems = new List<system_details>();
+        public static List<system_details> trackedSystems { get { return _trackedSystems; } }
 
-            updateSystemsFromTrackedFactions();
-            Events.factionsUpdated.Invoke();
-        }
         public static void addTrackedFactions(_faction[] newFactions)
         {
             foreach(_faction newFaction in newFactions)
@@ -28,65 +24,53 @@ public static class GameManager
                     _trackedFactions.Add(new TrackedFaction(newFaction));
             }
 
-            updateSystemsFromTrackedFactions();
             Events.factionsUpdated.Invoke();
-        }
-        public static void setTrackedFactions(TrackedFaction[] factions)
-        {
-            _trackedFactions = new List<TrackedFaction>();
-            foreach (TrackedFaction tf in factions)
-                _trackedFactions.Add(tf);
-
             updateSystemsFromTrackedFactions();
-            Events.factionsUpdated.Invoke();
         }
 
         public static void updateSystemsFromTrackedFactions()
         {
-            //Request the system data
-            List<string> systems = new List<string>();
-
-            //Grab the name of every system the faction has a presence in. If we're
-            //not already preparing to query for it, add it to the List<> above
             foreach (TrackedFaction tf in trackedFactions)
             {
                 foreach (_faction.FactionPresence fp in tf.faction.faction_presence)
                 {
-                    string sn = fp.system_name;
+                    system_details sd = fp.details;
+
                     bool found = false;
-                    foreach (_system s in trackedSystems)
+                    foreach (system_details ts in _trackedSystems)
                     {
-                        if (s.name == sn)
+                        if (sd._id == ts._id)
                             found = true;
                     }
                     if (!found)
-                        systems.Add(sn);
+                        _trackedSystems.Add(sd);
                 }
             }
 
-            executor.StartCoroutine(API.GetSystemData(systems.ToArray()));
-        }
-        public static CoroutineExecutor executor;
+            Events.systemsUpdated.Invoke();
 
-        public static bool isTrackingFaction(_faction faction)
-        {
-            foreach (TrackedFaction tracked in _trackedFactions)
+            List<string> systemsNeedingInfluence = new List<string>();
+            foreach (system_details sd in _trackedSystems)
             {
-                if (faction._id == tracked._id)
-                    return true;
+                bool needinf = false;
+                foreach(system_details.Faction sf in sd.factions)
+                {
+                    if (sf.influence <= 0.0f)
+                        needinf = true;
+                }
+
+                if (needinf)
+                    systemsNeedingInfluence.Add(sd.name);
             }
-            return false;
+
+            executor.StartCoroutine(API.GetSystemData(systemsNeedingInfluence.ToArray()));
         }
-
-        private static List<_system> _trackedSystems = new List<_system>();
-        public static List<_system> trackedSystems {  get { return _trackedSystems; } }
-
-        public static void addTrackedSystems(_system[] newSystems)
+        public static void addTrackedSystems(system_details[] newSystems)
         {
             foreach(var ns in newSystems)
             {
                 bool found = false;
-                foreach(_system sys in _trackedSystems)
+                foreach(system_details sys in _trackedSystems)
                 {
                     if (sys.name == ns.name)
                         found = true;
@@ -96,28 +80,40 @@ public static class GameManager
                     _trackedSystems.Add(ns);
             }
             
-            Events.trackedSystemsUpdated.Invoke();
+            Events.systemsUpdated.Invoke();
         }
 
-        public static Color colorOfSystem(_system s)
+        public static void updateSystemFactionInfluence(_system[] systems)
         {
-            string cfid = s.controlling_minor_faction_id;
-
-            Color col = Color.white;
-            foreach(TrackedFaction tf in trackedFactions)
+            foreach(_system i in systems)
             {
-                if (tf.faction._id == cfid)
-                    col = tf.color;
+                foreach(system_details j in trackedSystems)
+                {
+                    if (i.id == j._id)
+                    {
+                        foreach(system_details.Faction sf in j.factions)
+                        {
+                            foreach(_system.Faction f in i.factions)
+                            {
+                                if (f.faction_id == sf.faction_id)
+                                {
+                                    sf.influence = f.faction_details.faction_presence.influence;
+                                    sf.state = f.faction_details.faction_presence.state;
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
-            return col;
+            Events.systemsUpdated.Invoke();
         }
 
-        public static void setSelectedSystem(string name)
+        public static void setSelectedSystem(string id)
         {
-            foreach(_system s in trackedSystems)
+            foreach(system_details s in trackedSystems)
             {
-                if (s.name == name)
+                if (s._id == id)
                     Events.systemSelected.Invoke(s);
             }
         }
@@ -127,17 +123,41 @@ public static class GameManager
             {
                 if(tf.faction.name == name)
                 {
-                    setSelectedSystem(tf.faction.faction_presence[0].system_name);
+                    setSelectedSystem(tf.faction.faction_presence[0].system_id);
                 }
             }
+        }
+
+        public static Color colorOfSystem(system_details s)
+        {
+            string cfid = s.controlling_minor_faction_id;
+
+            Color col = Color.white;
+            foreach (TrackedFaction tf in trackedFactions)
+            {
+                if (tf.faction._id == cfid)
+                    col = tf.color;
+            }
+
+            return col;
+        }
+        public static bool isTrackingFaction(_faction faction)
+        {
+            foreach (TrackedFaction tracked in _trackedFactions)
+            {
+                if (faction._id == tracked._id)
+                    return true;
+            }
+            return false;
         }
     }
 
     public static class Events
     {
+        public static UnityEvent<string> statusUpdated = new UnityEvent<string>();
         public static UnityEvent factionsUpdated = new UnityEvent();
-        public static UnityEvent<_system> systemSelected = new UnityEvent<_system>();
-        public static UnityEvent trackedSystemsUpdated = new UnityEvent();
+        public static UnityEvent<system_details> systemSelected = new UnityEvent<system_details>();
+        public static UnityEvent systemsUpdated = new UnityEvent();
         public static UnityEvent<string> requestError = new UnityEvent<string>();
         public static UnityEvent<_faction[]> factionDataReceived = new UnityEvent<_faction[]>();
     }
