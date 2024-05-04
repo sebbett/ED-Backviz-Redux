@@ -12,6 +12,7 @@ namespace EDBR
 {
     public static class API
     {
+        //Use this to split the array into pages whose lengths fit the API limits.
         static T[][] SplitArray<T>(T[] array, int size)
         {
             int numOfArrays = (int)Math.Ceiling((double)array.Length / size);
@@ -26,41 +27,11 @@ namespace EDBR
 
             return result;
         }
+
         const string faction_url = "https://elitebgs.app/api/ebgs/v5/factions?";
         const string system_url = "https://elitebgs.app/api/ebgs/v5/systems?factionDetails=true";
         const string station_url = "https://elitebgs.app/api/ebgs/v5/stations?";
         const string tick_url = "https://elitebgs.app/api/ebgs/v5/ticks?";
-
-        //Request a single faction's data
-        public static IEnumerator GetFactionData(string faction_name)
-        {
-            string url = $"{faction_url}name={HttpUtility.UrlEncode(faction_name)}";
-            Debug.Log($"REQUESTING {url}");
-
-            using (UnityWebRequest request = UnityWebRequest.Get(url))
-            {
-                yield return request.SendWebRequest();
-
-                if(request.result == UnityWebRequest.Result.ConnectionError)
-                {
-                    GameManager.Events.requestError.Invoke(request.error);
-                }
-                else
-                {
-                    List<_faction> factions = new List<_faction>();
-
-                    if (GameManager.Events.factionDataReceived != null)
-                    {
-                        var jsonObject = JObject.Parse(request.downloadHandler.text);
-                        JArray docsArray = (JArray)jsonObject["docs"];
-                        string value = docsArray[0].ToString();
-                        factions.Add(Conversions.FactionFromJson(value));
-
-                        GameManager.Events.factionDataReceived.Invoke(factions.ToArray());
-                    }
-                }
-            }
-        }
 
         //Request multiple factions' data
         public static IEnumerator GetFactionData(string[] faction_names)

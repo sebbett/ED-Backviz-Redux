@@ -19,10 +19,6 @@ public class UIManager : MonoBehaviour
         GameManager.Events.systemSelected.AddListener(systemSelected);
     }
 
-    
-
-
-
     #region Variables
     public Header header;
     public Search search;
@@ -187,8 +183,6 @@ public class UIManager : MonoBehaviour
         //Sort factions by influence
         _system.Faction[] sortedFactions = s.factions.OrderByDescending(x => x.faction_details.faction_presence.influence).ToArray();
 
-
-
         //Populate the list
         foreach(_system.Faction f in sortedFactions)
         {
@@ -325,7 +319,7 @@ public class UIManager : MonoBehaviour
     {
         search.faction_details.SetActive(false);
         search.spinner.SetActive(true);
-        StartCoroutine(API.GetFactionData(r));
+        StartCoroutine(API.GetFactionData(new string[] {r}));
     }
     #endregion
 
