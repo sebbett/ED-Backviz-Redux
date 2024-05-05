@@ -448,17 +448,26 @@ namespace EDBR.Data
         }
     }
 
-    public struct TrackedFaction
+    public class Data
     {
-        public string _id;
-        public Color color;
-        public _faction faction;
-
-        public TrackedFaction(_faction faction)
+        public class TrackedFaction
         {
-            _id = faction._id;
-            color = new Color(Random.Range(0.1f, 0.9f), Random.Range(0.1f, 0.9f), Random.Range(0.1f, 0.9f), 1.0f);
-            this.faction = faction;
+            public string _id;
+            public Color color;
+            public _faction faction;
+            internal string name;
+
+            public TrackedFaction(_faction faction)
+            {
+                _id = faction._id;
+                color = new Color(Random.Range(0.1f, 0.9f), Random.Range(0.1f, 0.9f), Random.Range(0.1f, 0.9f), 1.0f);
+                this.faction = faction;
+            }
+
+            public void setColor(Color c)
+            {
+                color = c;
+            }
         }
     }
 }

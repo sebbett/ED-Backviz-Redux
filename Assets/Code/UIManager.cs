@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using static EDBR.Data.Data;
 
 public class UIManager : MonoBehaviour
 {
@@ -19,17 +20,15 @@ public class UIManager : MonoBehaviour
         GameManager.Events.systemSelected.AddListener(systemSelected);
         GameManager.Events.systemsUpdated.AddListener(systemsUpdated);
         GameManager.Events.statusUpdated.AddListener((status) => statusUpdated(status));
+        GameManager.Events.factionSelected.AddListener((f) => factionSelected(f));
     }
-
-    
-
-
 
     #region Variables
     public Header header;
     public Search search;
     public About about;
     public Details details;
+    public Factions factions;
     public Camera mainCamera;
     #endregion
 
@@ -38,6 +37,7 @@ public class UIManager : MonoBehaviour
         mainCamera = Camera.main;
         InitHeaderComponents();
         InitSearchComponents();
+        InitFactionComponents();
         InitAboutComponents();
         InitDetailComponents();
         UpdateUI(UIState.main);
@@ -47,6 +47,14 @@ public class UIManager : MonoBehaviour
     {
         GetEscapeKey();
         UpdateSystemDetails();
+
+        UpdateFactionScreen();
+    }
+
+    private void UpdateFactionScreen()
+    {
+        factions.color_update.interactable = (selectedFactionID.Length > 0);
+        factions.untrack.interactable = (selectedFactionID.Length > 0);
     }
 
     private void GetEscapeKey()
@@ -76,6 +84,7 @@ public class UIManager : MonoBehaviour
     {
         header.search.onClick.AddListener(() => UpdateUI(UIState.search));
         header.about.onClick.AddListener(() => UpdateUI( UIState.about));
+        header.factions.onClick.AddListener(() => UpdateUI(UIState.factions));
     }
     private void InitSearchComponents()
     {
@@ -93,6 +102,44 @@ public class UIManager : MonoBehaviour
     {
         details.conflicts.onClick.AddListener(() => ToggleConflictsPanel());
     }
+    private void InitFactionComponents()
+    {
+        factions.red_slider.onValueChanged.AddListener(value => { UpdateColorPreview(); });
+        factions.green_slider.onValueChanged.AddListener(value => { UpdateColorPreview(); });
+        factions.blue_slider.onValueChanged.AddListener(value => { UpdateColorPreview(); });
+        factions.color_update.onClick.AddListener(()=>SetFactionColor());
+        factions.untrack.onClick.AddListener(() => Untrack());
+    }
+
+    private void Untrack()
+    {
+        GameManager.Session.UntrackFaction(selectedFactionID);
+
+        foreach (Transform child in factions.system_object_parent)
+        {
+            Destroy(child.gameObject);
+        }
+
+        selectedFactionID = "";
+        selectedSystemID = "";
+    }
+
+    Color new_color = Color.cyan;
+    private void UpdateColorPreview()
+    {
+        float r, g, b;
+        r = factions.red_slider.value;
+        g = factions.green_slider.value;
+        b = factions.blue_slider.value;
+
+        new_color = new Color(r, g, b, 1);
+        factions.colorPreview.color = new_color;
+    }
+    private void SetFactionColor()
+    {
+        if (selectedFactionID.Length > 0)
+            GameManager.Session.setFactionColor(selectedFactionID, new_color);
+    }
     #endregion
 
     private UIState uiState;
@@ -104,6 +151,7 @@ public class UIManager : MonoBehaviour
         search.canvas.enabled = (uiState == UIState.search);
         about.canvas.enabled = (uiState == UIState.about);
         details.canvas.enabled = (uiState == UIState.main && selectedSystemID.Length > 0);
+        factions.canvas.enabled = (uiState == UIState.factions);
         mainCamera.GetComponent<MouseOrbit>().lockControls = !(cameraUnlockedStates.Any(x => x == uiState));
     }
 
@@ -165,25 +213,85 @@ public class UIManager : MonoBehaviour
             Destroy(child.gameObject);
         }
 
+        foreach(Transform child in factions.faction_object_parent)
+        {
+            Destroy(child.gameObject);
+        }
+
         //Populate new data
         foreach (TrackedFaction tf in GameManager.Session.trackedFactions)
         {
-            GameObject newObject = Instantiate(search.trackedFactionPrefab);
-            newObject.transform.Find("$FACTION_NAME").GetComponent<TMP_Text>().text = tf.faction.name;
-            newObject.transform.Find("$FACTION_HOME").GetComponent<TMP_Text>().text = tf.faction.faction_presence[0].system_name;
-            newObject.transform.Find("$FACTION_PRESENCE").GetComponent<TMP_Text>().text = ($"{tf.faction.faction_presence.Count} SYSTEMS");
-            newObject.transform.Find("$FACTION_COLOR").GetComponent<Image>().color = tf.color;
-            newObject.transform.SetParent(search.listParent);
-            newObject.GetComponent<Button>().onClick.AddListener(() => GameManager.Session.setSelectedFaction(tf.faction.name));
+            //Search list
+            GameObject searchFactionObject = Instantiate(search.faction_object_prefab);
+            searchFactionObject.transform.Find("$FACTION_NAME").GetComponent<TMP_Text>().text = tf.faction.name;
+            searchFactionObject.transform.Find("$FACTION_HOME").GetComponent<TMP_Text>().text = tf.faction.faction_presence[0].system_name;
+            searchFactionObject.transform.Find("$FACTION_PRESENCE").GetComponent<TMP_Text>().text = ($"{tf.faction.faction_presence.Count} SYSTEMS");
+            searchFactionObject.transform.Find("$FACTION_COLOR").GetComponent<Image>().color = tf.color;
+            searchFactionObject.transform.SetParent(search.listParent);
+            searchFactionObject.GetComponent<Button>().onClick.AddListener(() => GameManager.Session.setSelectedFaction(tf.faction.name));
+
+            //Faction list
+            GameObject factionListObject = Instantiate(factions.faction_object_prefab);
+            factionListObject.transform.Find("$FACTION_NAME").GetComponent<TMP_Text>().text = tf.faction.name;
+            factionListObject.transform.Find("$FACTION_HOME").GetComponent<TMP_Text>().text = tf.faction.faction_presence[0].system_name;
+            factionListObject.transform.Find("$FACTION_PRESENCE").GetComponent<TMP_Text>().text = ($"{tf.faction.faction_presence.Count} SYSTEMS");
+            factionListObject.transform.Find("$FACTION_COLOR").GetComponent<Image>().color = tf.color;
+            factionListObject.transform.SetParent(factions.faction_object_parent);
+            factionListObject.GetComponent<Button>().onClick.AddListener(() => GameManager.Session.setSelectedFaction(tf.faction.name));
+            
+        }
+    }
+
+    private string selectedFactionID = "";
+    private void factionSelected(TrackedFaction tf)
+    {
+        selectedFactionID = tf._id;
+
+        factions.faction_name.text = tf.faction.name.ToString();
+        factions.colorPreview.color = tf.color;
+
+        foreach(Transform child in factions.system_object_parent)
+        {
+            Destroy(child.gameObject);
+        }
+
+        List<_faction.FactionPresence> sorted = tf.faction.faction_presence.OrderBy(obj => obj.system_name).ToList();
+
+        foreach (_faction.FactionPresence i in sorted)
+        {
+            string inf()
+            {
+                string value = "LOADING";
+                if (i.influence > 0)
+                    value = ((float)i.influence * 100).ToString("##.##") + "%";
+                return value;
+            }
+
+            GameObject newObject = Instantiate(factions.system_object_prefab);
+            newObject.transform.Find("$SYSTEM_NAME").GetComponent<TMP_Text>().text = i.system_name;
+            newObject.transform.Find("$INFLUENCE").GetComponent<TMP_Text>().text = inf();
+            newObject.transform.Find("$STATE_COLOR").GetComponent<Image>().color = GetStateColor(i.state);
+            newObject.transform.Find("$STATE_COLOR").transform.Find("$STATE_TEXT").GetComponent<TMP_Text>().text = i.state;
+            newObject.GetComponent<Button>().onClick.AddListener(() => GameManager.Session.setSelectedSystem(i.system_id));
+            newObject.transform.SetParent(factions.system_object_parent);
+            if (i.system_name == tf.faction.faction_presence[0].system_name)
+            {
+                ColorBlock oldColor = newObject.GetComponent<Button>().colors;
+                oldColor.normalColor = factions.home_system;
+                newObject.GetComponent<Button>().colors = oldColor;
+                newObject.transform.Find("$SYSTEM_NAME").GetComponent<TMP_Text>().color = Color.black;
+                newObject.transform.Find("$INFLUENCE").GetComponent<TMP_Text>().color = Color.black;
+            }
         }
     }
 
     //Populate System Details
-
     private string selectedSystemID = "";
     private void systemSelected(system_details s)
     {
         selectedSystemID = s._id;
+
+        #region Search Screen
         details.system_label.text = s.name;
         details.copy.onClick.AddListener(() => CopySystemNameToClipboard(s.name));
 
@@ -261,6 +369,7 @@ public class UIManager : MonoBehaviour
 
             newCO.transform.SetParent(details.conflict_object_parent);
         }
+        #endregion
     }
 
     private void systemsUpdated()
@@ -316,7 +425,6 @@ public class UIManager : MonoBehaviour
     }
 
     #region Faction search functionality
-    //
     private void PerformLocalFactionSearch(string value)
     {
         string[] matches = DB.Factions.FindPartialMatches(value);
@@ -355,7 +463,8 @@ public class UIManager : MonoBehaviour
     {
         main = 0,
         search = 1,
-        about = 2
+        about = 2,
+        factions = 3
     }
 
     #region data types
@@ -363,7 +472,10 @@ public class UIManager : MonoBehaviour
     public class Header
     {
         public Canvas canvas;
-        public Button search, about;
+        public Button
+            search,
+            factions,
+            about;
         public TMP_Text status;
     }
     [System.Serializable]
@@ -395,7 +507,7 @@ public class UIManager : MonoBehaviour
 
         public Button track;
 
-        public GameObject trackedFactionPrefab;
+        public GameObject faction_object_prefab;
         public Transform listParent;
     }
 
@@ -445,6 +557,31 @@ public class UIManager : MonoBehaviour
             security_label,
             state_label,
             no_conflicts_label;
+    }
+
+    [Serializable]
+    public class Factions
+    {
+        public Canvas canvas;
+        public Transform
+            system_object_parent,
+            faction_object_parent;
+        public GameObject
+            system_object_prefab,
+            faction_object_prefab;
+        public Image
+            colorPreview;
+        public Slider
+            red_slider,
+            green_slider,
+            blue_slider;
+        public Button
+            color_update,
+            untrack;
+        public TMP_Text
+            faction_name;
+        public Color
+            home_system;
     }
     #endregion
 }

@@ -14,6 +14,7 @@ public class MapManager : MonoBehaviour
 
     private void Awake()
     {
+        GameManager.Events.factionsUpdated.AddListener(updateSystems);
         GameManager.Events.systemsUpdated.AddListener(updateSystems);
     }
 

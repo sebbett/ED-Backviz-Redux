@@ -3,10 +3,10 @@ using EDBR.Data;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using static EDBR.Data.Data;
 
 public static class GameManager
 {
-    
     public static class Session
     {
         public static CoroutineExecutor executor;
@@ -124,8 +124,23 @@ public static class GameManager
                 if(tf.faction.name == name)
                 {
                     setSelectedSystem(tf.faction.faction_presence[0].system_id);
+                    Events.factionSelected.Invoke(tf);
                 }
             }
+        }
+        public static void setFactionColor(string id, Color color)
+        {
+            int index = -1;
+            for(int i = 0; i < _trackedFactions.Count; i++)
+            {
+                if (_trackedFactions[i].faction._id == id)
+                    index = i;
+            }
+
+            if(index > -1)
+                _trackedFactions[index].setColor(color);
+
+            Events.factionsUpdated.Invoke();
         }
 
         public static Color colorOfSystem(system_details s)
@@ -150,6 +165,45 @@ public static class GameManager
             }
             return false;
         }
+        public static system_details[] getSystemsWithFaction(string faction_id)
+        {
+            List<system_details> value = new List<system_details>();
+
+            foreach(system_details i in _trackedSystems)
+            {
+                foreach(system_details.Faction j in i.factions)
+                {
+                    if(j.faction_id == faction_id)
+                        value.Add(i);
+                }
+            }
+
+            return value.ToArray();
+        }
+
+        public static void UntrackFaction(string selectedFactionID)
+        {
+            int index = -1;
+            if(selectedFactionID.Length > 0)
+            {
+                for(int i = 0; i < _trackedFactions.Count; i++)
+                {
+                    if (_trackedFactions[i].faction._id == selectedFactionID)
+                        index = i;
+                }
+            }
+
+            if (index > -1)
+            {
+                List<TrackedFaction> newList = _trackedFactions;
+                newList.RemoveAt(index);
+                _trackedFactions = newList;
+                _trackedSystems = new List<system_details>();
+            }
+
+            Events.factionsUpdated.Invoke();
+            updateSystemsFromTrackedFactions();
+        }
     }
 
     public static class Events
@@ -157,6 +211,7 @@ public static class GameManager
         public static UnityEvent<string> statusUpdated = new UnityEvent<string>();
         public static UnityEvent factionsUpdated = new UnityEvent();
         public static UnityEvent<system_details> systemSelected = new UnityEvent<system_details>();
+        public static UnityEvent<TrackedFaction> factionSelected = new UnityEvent<TrackedFaction>();
         public static UnityEvent systemsUpdated = new UnityEvent();
         public static UnityEvent<string> requestError = new UnityEvent<string>();
         public static UnityEvent<_faction[]> factionDataReceived = new UnityEvent<_faction[]>();

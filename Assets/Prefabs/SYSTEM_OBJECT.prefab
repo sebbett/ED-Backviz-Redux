@@ -173,7 +173,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 225, y: 47.8}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &1924524744308906081
 CanvasRenderer:
@@ -269,7 +269,7 @@ GameObject:
   - component: {fileID: 7630338994817631872}
   - component: {fileID: 2315638890031827794}
   m_Layer: 5
-  m_Name: $FACTION_NAME
+  m_Name: $SYSTEM_NAME
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -289,10 +289,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 8253807072299060445}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1, y: 1}
+  m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: -7.100006, y: -3.1}
-  m_SizeDelta: {x: 283.1, y: 25.4943}
+  m_SizeDelta: {x: -7.100006, y: 25.4943}
   m_Pivot: {x: 1, y: 1}
 --- !u!222 &7630338994817631872
 CanvasRenderer:
@@ -322,7 +322,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: $FACTION_NAME
+  m_text: $SYSTEM_NAME
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -385,7 +385,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 0, y: 0, z: 0, w: 7.34124}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
