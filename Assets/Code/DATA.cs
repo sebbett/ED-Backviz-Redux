@@ -464,6 +464,13 @@ namespace EDBR.Data
                 this.faction = faction;
             }
 
+            public TrackedFaction(_faction faction, Color color)
+            {
+                _id = faction._id;
+                this.color = color;
+                this.faction = faction;
+            }
+
             public void setColor(Color c)
             {
                 color = c;

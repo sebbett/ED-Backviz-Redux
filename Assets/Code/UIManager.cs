@@ -70,7 +70,7 @@ public class UIManager : MonoBehaviour
         else
             details.wanted_x = details.closed_x;
 
-        details.current_x = Mathf.Lerp(details.current_x, details.wanted_x, details.speed);
+        details.current_x = Mathf.Lerp(details.current_x, details.wanted_x, details.speed * Time.deltaTime);
 
         RectTransform pos = details.panel.GetComponent<RectTransform>();
 
@@ -279,8 +279,6 @@ public class UIManager : MonoBehaviour
                 ColorBlock oldColor = newObject.GetComponent<Button>().colors;
                 oldColor.normalColor = factions.home_system;
                 newObject.GetComponent<Button>().colors = oldColor;
-                newObject.transform.Find("$SYSTEM_NAME").GetComponent<TMP_Text>().color = Color.black;
-                newObject.transform.Find("$INFLUENCE").GetComponent<TMP_Text>().color = Color.black;
             }
         }
     }
