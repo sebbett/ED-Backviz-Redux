@@ -8,3 +8,4 @@ A tool for visualizing BGS data from Elite Dangerous. If you're like me and need
 ![screen_2](https://github.com/sebbett/ED-Backviz-Redux/blob/main/Screenshots/ED_Backviz_Redux_PVgcrNX8ys.png)
 ![screen_3](https://github.com/sebbett/ED-Backviz-Redux/blob/main/Screenshots/ED_Backviz_Redux_fiYoD2ketI.png)
 ![screen_4](https://github.com/sebbett/ED-Backviz-Redux/blob/main/Screenshots/ED_Backviz_Redux_oQUgcOfjmS.png)
+![screen_5](https://github.com/sebbett/ED-Backviz-Redux/blob/main/Screenshots/ED_Backviz_Redux_LRFTnKAZUV.png)
