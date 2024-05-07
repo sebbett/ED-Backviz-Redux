@@ -1854,7 +1854,7 @@ Canvas:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 214704001}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_RenderMode: 0
   m_Camera: {fileID: 0}
@@ -2682,36 +2682,10 @@ MonoBehaviour:
     factions: {fileID: 1763840510}
     about: {fileID: 252098395}
     status: {fileID: 1786315734}
-  details:
-    isOpen: 0
-    open_x: -450
-    closed_x: 0
-    wanted_x: 0
-    current_x: 0
-    speed: 50
-    greenState: {r: 0.20942448, g: 0.5377358, b: 0.1699448, a: 1}
-    yellowState: {r: 0.8207547, g: 0.63069475, b: 0, a: 1}
-    blueState: {r: 0.11414205, g: 0.3510463, b: 0.5377358, a: 1}
-    redState: {r: 0.6226415, g: 0.085172676, b: 0.085172676, a: 1}
-    greyState: {r: 0.2735849, g: 0.2735849, b: 0.2735849, a: 1}
-    canvas: {fileID: 1118997349}
-    panel: {fileID: 1853171352}
-    faction_object_parent: {fileID: 1285999291}
-    conflict_object_parent: {fileID: 1957717348}
-    faction_object_prefab: {fileID: 3191462558129955861, guid: 726b91355d4881246b5342ac9e54f82f, type: 3}
-    conflict_object_prefab: {fileID: 3509353810622073163, guid: 96fada004106b314eab15f5d3cb059b8, type: 3}
-    conflicts: {fileID: 162839534}
-    copy: {fileID: 397794483}
-    system_label: {fileID: 1268866593}
-    government_label: {fileID: 1182236784}
-    primary_econ_label: {fileID: 117270212}
-    secondary_econ_label: {fileID: 1942900073}
-    security_label: {fileID: 306138559}
-    state_label: {fileID: 107533408}
-    no_conflicts_label: {fileID: 2076903134}
   mainCamera: {fileID: 0}
   search_canvas: {fileID: 214704005}
   faction_canvas: {fileID: 889637281}
+  system_panel_canvas: {fileID: 1118997349}
   about_canvas: {fileID: 269985603}
 --- !u!1 &306138556
 GameObject:
@@ -3015,7 +2989,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 15.0007}
+  m_AnchoredPosition: {x: 0, y: 55.002594}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &331790035
@@ -7022,7 +6996,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -0.00001090765}
+  m_AnchoredPosition: {x: 0, y: 230.12004}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1048130060
@@ -7632,6 +7606,7 @@ GameObject:
   - component: {fileID: 1118997349}
   - component: {fileID: 1118997348}
   - component: {fileID: 1118997347}
+  - component: {fileID: 1118997350}
   m_Layer: 5
   m_Name: c_system
   m_TagString: Untagged
@@ -7707,7 +7682,7 @@ Canvas:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1118997345}
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 3
   m_RenderMode: 0
   m_Camera: {fileID: 0}
@@ -7723,6 +7698,43 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
+--- !u!114 &1118997350
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1118997345}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 451cf6d41b3faac4ca78f0c1612bb9e3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isOpen: 0
+  open_x: -430
+  closed_x: 0
+  wanted_x: 0
+  current_x: 0
+  speed: 25
+  green_state: {r: 0.20784314, g: 0.5372549, b: 0.16862746, a: 1}
+  yellow_state: {r: 0.81960785, g: 0.6313726, b: 0, a: 1}
+  blue_state: {r: 0.11372549, g: 0.3529412, b: 0.5372549, a: 1}
+  red_state: {r: 0.62352943, g: 0.08627451, b: 0.08627451, a: 1}
+  grey_state: {r: 0.27450982, g: 0.27450982, b: 0.27450982, a: 1}
+  panel: {fileID: 1853171352}
+  faction_object_parent: {fileID: 1285999291}
+  conflict_object_parent: {fileID: 1957717348}
+  faction_object_prefab: {fileID: 3191462558129955861, guid: 726b91355d4881246b5342ac9e54f82f, type: 3}
+  conflict_object_prefab: {fileID: 3509353810622073163, guid: 96fada004106b314eab15f5d3cb059b8, type: 3}
+  conflicts: {fileID: 162839534}
+  copy: {fileID: 397794483}
+  system_label: {fileID: 1268866593}
+  government_label: {fileID: 1182236784}
+  primary_econ_label: {fileID: 117270212}
+  secondary_econ_label: {fileID: 1942900073}
+  security_label: {fileID: 306138559}
+  state_label: {fileID: 107533408}
+  no_conflicts_label: {fileID: 2076903134}
 --- !u!1001 &1131813537
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7977,7 +7989,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1945809926}
   m_HandleRect: {fileID: 1945809925}
   m_Direction: 0
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -9147,7 +9159,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1863375242}
   m_HandleRect: {fileID: 1863375241}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 0.53415096
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
