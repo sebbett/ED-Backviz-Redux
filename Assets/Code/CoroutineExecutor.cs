@@ -11,7 +11,8 @@ public class CoroutineExecutor : MonoBehaviour
 
     private void Awake()
     {
-        GameManager.Session.executor = this;
+        //GameManager.Session.executor = this;
+        bvCore.exe = this;
     }
 
     //fucking trash.

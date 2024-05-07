@@ -134,7 +134,7 @@ public static class GameManager
             int index = -1;
             for(int i = 0; i < _trackedFactions.Count; i++)
             {
-                if (_trackedFactions[i].faction._id == id)
+                if (_trackedFactions[i].faction.id == id)
                     index = i;
             }
 
@@ -151,7 +151,7 @@ public static class GameManager
             Color col = Color.white;
             foreach (TrackedFaction tf in trackedFactions)
             {
-                if (tf.faction._id == cfid)
+                if (tf.faction.id == cfid)
                     col = tf.color;
             }
 
@@ -161,7 +161,7 @@ public static class GameManager
         {
             foreach (TrackedFaction tracked in _trackedFactions)
             {
-                if (faction._id == tracked._id)
+                if (faction.id == tracked._id)
                     return true;
             }
             return false;
@@ -189,7 +189,7 @@ public static class GameManager
             {
                 for(int i = 0; i < _trackedFactions.Count; i++)
                 {
-                    if (_trackedFactions[i].faction._id == selectedFactionID)
+                    if (_trackedFactions[i].faction.id == selectedFactionID)
                         index = i;
                 }
             }

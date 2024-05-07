@@ -18,8 +18,6 @@ namespace EDBR.Data
             return JsonConvert.DeserializeObject<_system>(json);
         }
 
-
-
         public static _faction FactionFromJson(string json)
         {
             return JsonConvert.DeserializeObject<_faction>(json);
@@ -183,7 +181,7 @@ namespace EDBR.Data
     public struct _faction
     {
         [JsonProperty("_id")]
-        public string _id { get; set; }
+        public string id { get; set; }
 
         [JsonProperty("name_lower")]
         public string name_lower { get; set; }
@@ -209,7 +207,7 @@ namespace EDBR.Data
         [JsonProperty("updated_at")]
         public DateTime updated_at { get; set; }
 
-        [global::System.Serializable]
+        [Serializable]
         public class FactionPresence
         {
             [JsonProperty("system_name")]
@@ -264,9 +262,6 @@ namespace EDBR.Data
             }
         }
 
-        [JsonProperty("__v")]
-        public int __v { get; set; }
-
         [JsonProperty("allegiance")]
         public string allegiance { get; set; }
 
@@ -282,8 +277,6 @@ namespace EDBR.Data
         [JsonProperty("controlling_minor_faction_id")]
         public string controlling_minor_faction_id { get; set; }
 
-        [JsonProperty("eddb_id")]
-        public string eddb_id { get; set; }
 
         [JsonProperty("factions")]
         public List<Faction> factions { get; set; }
@@ -312,9 +305,6 @@ namespace EDBR.Data
         [JsonProperty("state")]
         public string state { get; set; }
 
-        [JsonProperty("system_address")]
-        public string system_address { get; set; }
-
         [JsonProperty("updated_at")]
         public DateTime updated_at { get; set; }
 
@@ -327,8 +317,6 @@ namespace EDBR.Data
         [JsonProperty("z")]
         public float z { get; set; }
 
-        [JsonProperty("name_aliases")]
-        public List<object> name_aliases { get; set; }
 
         public class Faction
         {
@@ -459,14 +447,14 @@ namespace EDBR.Data
 
             public TrackedFaction(_faction faction)
             {
-                _id = faction._id;
+                _id = faction.id;
                 color = new Color(Random.Range(0.1f, 0.9f), Random.Range(0.1f, 0.9f), Random.Range(0.1f, 0.9f), 1.0f);
                 this.faction = faction;
             }
 
             public TrackedFaction(_faction faction, Color color)
             {
-                _id = faction._id;
+                _id = faction.id;
                 this.color = color;
                 this.faction = faction;
             }
