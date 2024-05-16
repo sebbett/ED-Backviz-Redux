@@ -1,10 +1,9 @@
-using EDBR;
-using EDBR.Data;
+using bv;
+using bvData;
 using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using static EDBR.Data.Data;
 
 public class ui_search : MonoBehaviour
 {
@@ -39,40 +38,40 @@ public class ui_search : MonoBehaviour
 
     void Awake()
     {
-        GameManager.Events.factionDataReceived.AddListener(factionDataReceived);
-        GameManager.Events.factionsUpdated.AddListener(factionsUpdated);
+        bvCore.Events.TrackedFactionsUpdated.AddListener(factionsUpdated);
 
         InitSearchComponents();
     }
 
     private void InitSearchComponents()
     {
-        search_bar.onValueChanged.AddListener((value) => PerformLocalFactionSearch(value));
+        search_bar.onValueChanged.AddListener((value) => GetSearchMatches(value));
     }
 
-    private void factionDataReceived(_faction[] data)
+    private void factionDataReceived(bvFaction[] data)
     {
-        _faction faction = data[0];
+        bvFaction faction = data[0];
         faction_details.SetActive(true);
         spinner.SetActive(false);
 
         details_name.text = faction.name;
-        details_home.text = ($"Home: {faction.faction_presence[0].system_name}");
+        details_home.text = ($"Home: {faction.faction_presence[0].name}");
         details_allegiance.text = ($"Allegiance: {faction.allegiance}");
         details_government.text = ($"Government: {faction.government}");
         details_presence.text = ($"Presence: {faction.faction_presence.Count()} systems(s)");
 
         track.onClick.RemoveAllListeners();
-        track.onClick.AddListener(() => GameManager.Session.addTrackedFactions(new _faction[] { faction }));
+        track.onClick.AddListener(() => bvCore.Session.RequestFactions(new string[] { faction.name }));
         track.onClick.AddListener(() => track.interactable = false);
 
-        track.interactable = !GameManager.Session.isTrackingFaction(faction);
+        track.interactable = !bvCore.Session.factionIsTracked(faction);
 
         logo_alliance.enabled = faction.allegiance == "alliance";
         logo_empire.enabled = faction.allegiance == "empire";
         logo_federation.enabled = faction.allegiance == "federation";
         logo_independent.enabled = faction.allegiance == "independent";
     }
+
     //Populate tracked factions
     private void factionsUpdated()
     {
@@ -83,16 +82,16 @@ public class ui_search : MonoBehaviour
         }
 
         //Populate new data
-        foreach (TrackedFaction tf in GameManager.Session.trackedFactions)
+        foreach (bvFaction faction in bvCore.Session.factions)
         {
             //Search list
             GameObject searchFactionObject = Instantiate(faction_object_prefab);
-            searchFactionObject.transform.Find("$FACTION_NAME").GetComponent<TMP_Text>().text = tf.faction.name;
-            searchFactionObject.transform.Find("$FACTION_HOME").GetComponent<TMP_Text>().text = tf.faction.faction_presence[0].system_name;
-            searchFactionObject.transform.Find("$FACTION_PRESENCE").GetComponent<TMP_Text>().text = ($"{tf.faction.faction_presence.Count} SYSTEMS");
-            searchFactionObject.transform.Find("$FACTION_COLOR").GetComponent<Image>().color = tf.color;
+            searchFactionObject.transform.Find("$FACTION_NAME").GetComponent<TMP_Text>().text = faction.name;
+            searchFactionObject.transform.Find("$FACTION_HOME").GetComponent<TMP_Text>().text = faction.faction_presence[0].name;
+            searchFactionObject.transform.Find("$FACTION_PRESENCE").GetComponent<TMP_Text>().text = ($"{faction.faction_presence.Length} SYSTEMS");
+            searchFactionObject.transform.Find("$FACTION_COLOR").GetComponent<Image>().color = faction.color;
             searchFactionObject.transform.SetParent(listParent);
-            searchFactionObject.GetComponent<Button>().onClick.AddListener(() => GameManager.Session.setSelectedFaction(tf.faction.name));
+            searchFactionObject.GetComponent<Button>().onClick.AddListener(() => GameManager.Session.setSelectedFaction(faction.name));
         }
     }
 
@@ -100,31 +99,31 @@ public class ui_search : MonoBehaviour
     {
         faction_details.SetActive(false);
         spinner.SetActive(true);
-        StartCoroutine(API.GetFactionData(new string[] { r }));
+        //StartCoroutine(API.GetFactionData(new string[] { r }));
+        StartCoroutine(bvAPI.bvAPI.GetFactionData(new string[] { r }, factionDataReceived));
     }
 
-    private void PerformLocalFactionSearch(string value)
+    private void GetSearchMatches(string value)
     {
-        string[] matches = DB.Factions.FindPartialMatches(value);
-        UpdateSearchResults(matches);
-    }
-
-    private void UpdateSearchResults(string[] results)
-    {
+        //Get a list of partial matches from the local faction DB
+        string[] matches = Database.Factions.FindPartialMatches(value);
+        
         //Clear current search results
         foreach (Transform child in search_results.transform)
         {
             Destroy(child.gameObject);
         }
-        //Add new results
-        foreach (string r in results)
+
+        //Add new search results
+        foreach (string match in matches)
         {
             GameObject newSearchResult = Instantiate(search_result_prefab);
-            newSearchResult.GetComponentInChildren<TMP_Text>().text = r;
-            newSearchResult.GetComponent<Button>().onClick.AddListener(() => GetFactionDetails(r));
+            newSearchResult.GetComponentInChildren<TMP_Text>().text = match;
+            newSearchResult.GetComponent<Button>().onClick.AddListener(() => GetFactionDetails(match));
             newSearchResult.transform.SetParent(search_results.transform);
         }
 
-        no_matches_found.enabled = !(results.Length > 0);
+        //If no matches found, tell the user
+        no_matches_found.enabled = !(matches.Length > 0);
     }
 }

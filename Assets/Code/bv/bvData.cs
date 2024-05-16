@@ -20,11 +20,11 @@ namespace bvData
         [JsonProperty("government")]
         public string government { get; set; }
 
-        /*public Color color { get; private set; }
+        public Color color { get; private set; }
         public void SetColor(Color color)
         {
             this.color = color;
-        }*/
+        }
 
         //Influence, states, conflicts, etc. will be 
         //handled by the bvSystem class. FactionPresence

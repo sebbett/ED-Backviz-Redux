@@ -24,5 +24,6 @@ namespace bvUtils
         }
     }
 
-    public delegate void APICallback(bvFaction[] factions);
+    public delegate void FactionApiCallback(bvFaction[] factions);
+    public delegate void SystemApiCallback(bvSystem[] systems);
 }

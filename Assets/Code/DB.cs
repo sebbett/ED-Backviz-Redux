@@ -5,9 +5,9 @@ using System;
 using Mono.Data.Sqlite;
 using System.Diagnostics;
 
-namespace EDBR
+namespace bv
 {
-    public static class DB
+    public static class Database
     {
         public static class Factions
         {
