@@ -1,3 +1,4 @@
+using bvData;
 using EDBR.Data;
 using System;
 using System.Collections;
@@ -46,8 +47,8 @@ public class ui_factions : MonoBehaviour
     private void Awake()
     {
         //Event subscriptions
-        GameManager.Events.factionsUpdated.AddListener(factionsUpdated);
-        GameManager.Events.factionSelected.AddListener((f) => factionSelected(f));
+        bvCore.Events.TrackedFactionsUpdated.AddListener(factionsUpdated);
+        bvCore.Events.FactionSelected.AddListener(f => factionSelected(f));
 
         InitFactionComponents();
     }
@@ -79,81 +80,22 @@ public class ui_factions : MonoBehaviour
         colorPreview.color = new_color;
     }
 
-    private void factionSelected(TrackedFaction tf)
+    private void factionSelected(bvFaction faction)
     {
-        selected_faction_id = tf._id;
-        colorPreview.color = tf.color;
-
-        //Clear system list
-        foreach (Transform child in system_object_parent)
-        {
-            Destroy(child.gameObject);
-        }
-
-        //Populate new systems
-        List<_faction.FactionPresence> sorted;
-        sorted = tf.faction.faction_presence.OrderBy(obj => obj.system_name).ToList();
-
-        foreach (_faction.FactionPresence i in sorted)
-        {
-            string inf()
-            {
-                string value = "LOADING";
-                if (i.influence > 0)
-                    value = ((float)i.influence * 100).ToString("##.##") + "%";
-                return value;
-            }
-
-            GameObject newObject = Instantiate(system_object_prefab);
-            newObject.transform.Find("$SYSTEM_NAME").GetComponent<TMP_Text>().text = i.system_name;
-            newObject.transform.Find("$INFLUENCE").GetComponent<TMP_Text>().text = inf();
-            newObject.transform.Find("$STATE_COLOR").GetComponent<Image>().color = GetStateColor(i.state);
-            newObject.transform.Find("$STATE_COLOR").transform.Find("$STATE_TEXT").GetComponent<TMP_Text>().text = i.state;
-            newObject.GetComponent<Button>().onClick.AddListener(() => GameManager.Session.setSelectedSystem(i.system_id));
-            newObject.transform.SetParent(system_object_parent);
-            if (i.system_name == tf.faction.faction_presence[0].system_name)
-            {
-                ColorBlock oldColor = newObject.GetComponent<Button>().colors;
-                oldColor.normalColor = home_system;
-                newObject.GetComponent<Button>().colors = oldColor;
-            }
-        }
+        
     }
     private void factionsUpdated()
     {
-        foreach (Transform child in faction_object_parent)
-        {
-            Destroy(child.gameObject);
-        }
-        foreach (TrackedFaction tf in GameManager.Session.trackedFactions)
-        {
-            //Faction list
-            GameObject factionListObject = Instantiate(faction_object_prefab);
-            factionListObject.transform.Find("$FACTION_NAME").GetComponent<TMP_Text>().text = tf.faction.name;
-            factionListObject.transform.Find("$FACTION_HOME").GetComponent<TMP_Text>().text = tf.faction.faction_presence[0].system_name;
-            factionListObject.transform.Find("$FACTION_PRESENCE").GetComponent<TMP_Text>().text = ($"{tf.faction.faction_presence.Count} SYSTEMS");
-            factionListObject.transform.Find("$FACTION_COLOR").GetComponent<Image>().color = tf.color;
-            factionListObject.transform.SetParent(faction_object_parent);
-            factionListObject.GetComponent<Button>().onClick.AddListener(() => GameManager.Session.setSelectedFaction(tf.faction.name));
-        }
+        
     }
 
     private void SetFactionColor()
     {
-        if (selected_faction_id.Length > 0)
-            GameManager.Session.setFactionColor(selected_faction_id, new_color);
+        
     }
     private void Untrack()
     {
-        GameManager.Session.UntrackFaction(selected_faction_id);
 
-        foreach (Transform child in system_object_parent)
-        {
-            Destroy(child.gameObject);
-        }
-
-        selected_faction_id = "";
-        selected_system_id = "";
     }
 
     private Color GetStateColor(string state)

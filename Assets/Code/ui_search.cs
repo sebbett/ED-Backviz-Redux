@@ -33,7 +33,7 @@ public class ui_search : MonoBehaviour
     public Button track;
 
     public GameObject faction_object_prefab;
-    public Transform listParent;
+    public Transform faction_object_parent;
     #endregion
 
     void Awake()
@@ -76,7 +76,7 @@ public class ui_search : MonoBehaviour
     private void factionsUpdated()
     {
         //Clear current list
-        foreach (Transform child in listParent)
+        foreach (Transform child in faction_object_parent)
         {
             Destroy(child.gameObject);
         }
@@ -90,8 +90,8 @@ public class ui_search : MonoBehaviour
             searchFactionObject.transform.Find("$FACTION_HOME").GetComponent<TMP_Text>().text = faction.faction_presence[0].name;
             searchFactionObject.transform.Find("$FACTION_PRESENCE").GetComponent<TMP_Text>().text = ($"{faction.faction_presence.Length} SYSTEMS");
             searchFactionObject.transform.Find("$FACTION_COLOR").GetComponent<Image>().color = faction.color;
-            searchFactionObject.transform.SetParent(listParent);
-            searchFactionObject.GetComponent<Button>().onClick.AddListener(() => GameManager.Session.setSelectedFaction(faction.name));
+            searchFactionObject.transform.SetParent(faction_object_parent);
+            searchFactionObject.GetComponent<Button>().onClick.AddListener(() => bvCore.Session.SetSelectedFaction(faction.id));
         }
     }
 

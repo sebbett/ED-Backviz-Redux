@@ -1,8 +1,5 @@
-using EDBR.Data;
 using Newtonsoft.Json;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace bvData
@@ -69,26 +66,45 @@ namespace bvData
     public class bvSystem
     {
         [JsonProperty("_id")]
-        public string id { get; set; }
+        public string id;
         [JsonProperty("name_lower")]
-        public string name { get; set; }
+        public string name;
+        [JsonProperty("x")]
+        public double x;
+        [JsonProperty("y")]
+        public double y;
+        [JsonProperty("z")]
+        public double z;
         [JsonProperty("allegiance")]
-        public string allegiance { get; set; }
+        public string allegiance;
         [JsonProperty("government")]
-        public string government { get; set; }
+        public string government;
         [JsonProperty("primary_economy")]
-        public string primary_econ { get; set; }
+        public string primary_econ;
         [JsonProperty("secondary_economy")]
-        public string secondary_econ { get; set; }
+        public string secondary_econ;
         [JsonProperty("security")]
-        public string security { get; set; }
+        public string security;
         [JsonProperty("state")]
-        public string state {  get; set; }
+        public string state;
         [JsonProperty("controlling_minor_faction_id")]
-        public string controlling_faction_id { get ; set; }
+        public string controlling_faction_id;
 
         [JsonProperty("factions")]
         public Faction[] factions;
+
+        public Vector3 position
+        {
+            get
+            {
+                Vector3 pos = new Vector3();
+                pos.x = (float)x;
+                pos.y = (float)y;
+                pos.z = (float)z;
+
+                return pos;
+            }
+        }
 
         [Serializable]
         public class Faction
@@ -127,6 +143,15 @@ namespace bvData
         public static bvSystem fromJson(string json)
         {
             return JsonConvert.DeserializeObject<bvSystem>(json);
+        }
+
+        public bvSystem(bvFaction.FactionPresence presence)
+        {
+            id = presence.id;
+            name = presence.name;
+            x = presence.x;
+            y = presence.y;
+            z = presence.z;
         }
     }
     #endregion

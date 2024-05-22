@@ -6,6 +6,7 @@ using EDBR.Data;
 using EDBR;
 using UnityEngine.Events;
 using System.Linq;
+using bvData;
 
 public class MapManager : MonoBehaviour
 {
@@ -14,11 +15,10 @@ public class MapManager : MonoBehaviour
 
     private void Awake()
     {
-        GameManager.Events.factionsUpdated.AddListener(updateSystems);
-        GameManager.Events.systemsUpdated.AddListener(updateSystems);
+        bvCore.Events.MapUpdated.AddListener(updateMap);
     }
 
-    private void updateSystems()
+    private void updateMap()
     {
         //Clear all current nodes
         foreach (Transform child in node_parent)
@@ -27,15 +27,10 @@ public class MapManager : MonoBehaviour
         }
 
         //Populate new nodes
-        foreach (system_details s in GameManager.Session.trackedSystems)
+        foreach (bvSystem s in bvCore.Session.systems)
         {
-            Vector3 pos = new Vector3((float)s.x, (float)s.y, (float)s.z);
-            GameObject newNode = Instantiate(node_prefab, pos, Quaternion.identity);
-            newNode.GetComponentInChildren<MeshRenderer>().material.color = GameManager.Session.colorOfSystem(s);
-            newNode.GetComponent<Node>().onClick.AddListener(() => GameManager.Session.setSelectedSystem(s._id));
-
-            if(s.conflicts.Count > 0) newNode.transform.Find("conflict_particles").gameObject.SetActive(true);
-
+            GameObject newNode = Instantiate(node_prefab);
+            newNode.transform.position = s.position;
             newNode.transform.parent = node_parent;
         }
     }

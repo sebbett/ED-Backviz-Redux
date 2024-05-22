@@ -1,3 +1,4 @@
+using bvData;
 using EDBR.Data;
 using System.Collections;
 using System.Collections.Generic;
@@ -44,11 +45,11 @@ public class ui_system_panel : MonoBehaviour
         no_conflicts_label;
     #endregion
 
-    private UIManager ui_manager;
+    public UIManager manager;
 
     private void Awake()
     {
-        GameManager.Events.systemSelected.AddListener(systemSelected);
+        bvCore.Events.SystemSelected.AddListener(systemSelected);
 
         InitDetailComponents();
     }
@@ -89,88 +90,9 @@ public class ui_system_panel : MonoBehaviour
         GUIUtility.systemCopyBuffer = text;
     }
 
-    string selected_system_id = "";
-    private void systemSelected(system_details s)
+    private void systemSelected(bvSystem s)
     {
-        selected_system_id = s._id;
 
-        system_label.text = s.name;
-        copy.onClick.AddListener(() => CopySystemNameToClipboard(s.name));
-
-        //Clear current faction objects
-        foreach (Transform child in faction_object_parent)
-        {
-            Destroy(child.gameObject);
-        }
-
-        //Sort factions by influence
-        system_details.Faction[] sortedFactions = s.factions.OrderByDescending(x => x.influence).ToArray();
-
-        //Populate the list
-        foreach (system_details.Faction f in sortedFactions)
-        {
-            string name = f.name;
-            string inf()
-            {
-                string i = "LOADING";
-                if (f.influence > 0)
-                    i = ((float)f.influence * 100).ToString("##.##") + "%";
-                return i;
-            }
-            string current_state = f.state;
-            //string pending_state = "none";
-            //Debug.Log(pending_state);
-
-            GameObject newFO = Instantiate(faction_object_prefab);
-            newFO.transform.Find("$FACTION_NAME").GetComponent<TMP_Text>().text = name;
-            newFO.transform.Find("$INFLUENCE").GetComponent<TMP_Text>().text = inf();
-            newFO.transform.Find("$STATE_COLOR").transform.Find("$STATE_TEXT").GetComponent<TMP_Text>().text = current_state;
-            newFO.transform.Find("$STATE_COLOR").GetComponent<Image>().color = GetStateColor(current_state);
-            newFO.GetComponent<Button>().onClick.AddListener(() => ui_manager.UpdateUI(UIState.search));
-            //newFO.GetComponent<Button>().onClick.AddListener(() => GetFactionDetails(f.name));
-            newFO.transform.SetParent(faction_object_parent);
-        }
-
-        string government = CleanText(s.government);
-        string primary_econ = CleanText(s.primary_economy);
-        string secondary_econ = CleanText(s.secondary_economy);
-        string security = CleanText(s.security);
-        string sys_state = CleanText(s.state);
-
-        government_label.text = ($"Government: {government}");
-        primary_econ_label.text = ($"Primary Economy: {primary_econ}");
-        secondary_econ_label.text = ($"Secondary Economy: {secondary_econ}");
-        security_label.text = ($"Security: {security}");
-        state_label.text = ($"State: {sys_state}");
-
-        //Clear conflict objects
-        foreach (Transform child in conflict_object_parent)
-        {
-            Destroy(child.gameObject);
-        }
-
-        no_conflicts_label.gameObject.SetActive(s.conflicts.Count == 0);
-
-        //Populate new conflicts
-        foreach (system_details.Conflict c in s.conflicts)
-        {
-            string conflict_status = c.status;
-            if (conflict_status == "")
-                conflict_status = "concluded";
-
-            GameObject newCO = Instantiate(conflict_object_prefab);
-            newCO.transform.Find("$CONFLICT_TYPE").GetComponent<TMP_Text>().text = c.type;
-            newCO.transform.Find("$CONFLICT_STATUS").GetComponent<TMP_Text>().text = conflict_status;
-            newCO.transform.Find("$SCORE_A").GetComponent<TMP_Text>().text = c.faction1.days_won.ToString();
-            newCO.transform.Find("$SIDE_A_NAME").GetComponent<TMP_Text>().text = c.faction1.name.ToString();
-            newCO.transform.Find("$SIDE_A_STAKE").GetComponent<TMP_Text>().text = c.faction1.stake.ToString();
-
-            newCO.transform.Find("$SCORE_B").GetComponent<TMP_Text>().text = c.faction2.days_won.ToString();
-            newCO.transform.Find("$SIDE_B_NAME").GetComponent<TMP_Text>().text = c.faction2.name.ToString();
-            newCO.transform.Find("$SIDE_B_STAKE").GetComponent<TMP_Text>().text = c.faction2.stake.ToString();
-
-            newCO.transform.SetParent(conflict_object_parent);
-        }
     }
 
     private string CleanText(string input)
@@ -213,10 +135,5 @@ public class ui_system_panel : MonoBehaviour
         else value = grey_state;
 
         return value;
-    }
-
-    public void SetUIManager(UIManager m)
-    {
-        ui_manager = m;
     }
 }

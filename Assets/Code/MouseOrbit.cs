@@ -37,7 +37,7 @@ public class MouseOrbit : MonoBehaviour
 
     private void Awake()
     {
-        GameManager.Events.systemSelected.AddListener((v) => SetTarget(new Vector3((float)v.x, (float)v.y, (float)v.z)));
+        bvCore.Events.SystemSelected.AddListener((v) => SetTarget(new Vector3((float)v.x, (float)v.y, (float)v.z)));
     }
 
     public void disableMovement()
